@@ -1,0 +1,137 @@
+/* ===============================
+   WISHLIST – STABLE IN-DASHBOARD UI
+   =============================== */
+
+.wishlist-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Soft, stable shadow inside dashboard */
+  min-height: calc(100vh - 120px); /* Fill dashboard properly */
+}
+
+.wishlist-container h2 {
+  font-size: 26px;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.empty-wishlist {
+  text-align: center;
+  padding: 80px 20px;
+  color: #7f8c8d;
+}
+
+.empty-wishlist h3 {
+  font-size: 22px;
+  color: #34495e;
+  margin-bottom: 10px;
+}
+
+/* WISHLIST GRID */
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 25px;
+}
+
+.wishlist-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #eef2f5;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.wishlist-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.wishlist-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: #f6f8fb;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.wishlist-card h4 {
+  font-size: 16px;
+  color: #2c3e50;
+  margin: 0 0 5px 0;
+}
+
+.w-rating {
+  font-size: 13px;
+  color: #f39c12;
+  margin-bottom: 10px;
+}
+
+.w-rating span {
+  color: #7f8c8d;
+  margin-left: 5px;
+}
+
+.w-price {
+  font-weight: 700;
+  font-size: 18px;
+  color: #27ae60;
+  margin: 0 0 5px 0;
+}
+
+.w-cat {
+  font-size: 13px;
+  color: #95a5a6;
+  margin-bottom: 15px;
+}
+
+.add-btn {
+  margin-top: auto; /* Force to bottom */
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #1abc9c;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-btn:hover {
+  background: #16a085;
+}
+
+.add-btn.added {
+  background: #27ae60;
+  cursor: default;
+}
+
+/* TOP RIGHT REMOVE HEART */
+.remove-heart-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: white;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.remove-heart-btn:hover {
+  transform: scale(1.15);
+}

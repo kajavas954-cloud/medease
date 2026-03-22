@@ -1,0 +1,49 @@
+.home-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #a8e6cf, #1abc9c);
+}
+.home-card {
+  background-color: white;
+  padding: 30px;
+  width: 320px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.home-card h2 {
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.home-card p {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.home-card button {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 6px;
+  background-color: #1abc9c;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.home-card button:hover {
+  background-color: #16a085;
+}
+
+.logout {
+  background-color: #e74c3c;
+}
+
+.logout:hover {
+  background-color: #c0392b;
+}

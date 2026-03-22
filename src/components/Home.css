@@ -1,0 +1,75 @@
+.home-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(135deg, #a8e6cf, #1abc9c);
+}
+
+/* HOME CARD (SAME SIZE AS LOGIN & REGISTER) */
+.home-card {
+  background: #fff;
+  padding: 45px 50px;       /* SAME SPACING */
+  width: 420px;             /* SAME WIDTH */
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.home-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+}
+
+/* HEADING */
+.home-card h2 {
+  margin-bottom: 10px;
+  font-size: 30px;          /* BIG TITLE */
+  color: #2c3e50;
+}
+
+/* SUBTEXT */
+.home-card p {
+  font-size: 16px;          /* BIGGER TEXT */
+  color: #555;
+  margin-bottom: 30px;
+}
+
+/* BUTTONS */
+.home-card button {
+  width: 100%;
+  padding: 14px;            /* SAME BUTTON SIZE */
+  margin: 12px 0;
+  border: none;
+  border-radius: 8px;
+  background-color: #1abc9c;
+  color: white;
+  font-size: 17px;          /* BIG TEXT */
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.home-card button:hover {
+  background-color: #16a085;
+  transform: scale(1.05);
+}
+
+/* LOGOUT BUTTON */
+.logout {
+  background-color: #f1c40f;
+}
+
+.logout:hover {
+  background-color: #d4ac0d;
+}
+
+/* THEME BUTTON */
+.theme-btn {
+  background-color: #2c3e50;
+}
+
+.theme-btn:hover {
+  background-color: #1a252f;
+}

@@ -1,0 +1,153 @@
+.adviser-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.adviser-container h2 {
+  color: #2c3e50;
+  margin-bottom: 5px;
+  font-size: 24px;
+}
+
+.adviser-subtitle {
+  color: #7f8c8d;
+  margin-bottom: 25px;
+  font-size: 15px;
+}
+
+.adviser-search {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.adviser-search input {
+  flex: 1;
+  padding: 14px 20px;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.adviser-search input:focus {
+  border-color: #1abc9c;
+}
+
+.adviser-search button {
+  padding: 0 25px;
+  background: #1abc9c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.adviser-search button:hover {
+  background: #1abc9c;
+}
+
+/* Results Section */
+.adviser-results {
+  margin-top: 20px;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.no-result {
+  background: #fff3cd;
+  color: #856404;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 5px solid #ffeeba;
+}
+
+.result-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 25px;
+}
+
+.result-card h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e6ed;
+  padding-bottom: 10px;
+}
+
+.highlight-symptom {
+  color: #e74c3c;
+  text-transform: capitalize;
+}
+
+.result-section {
+  margin-bottom: 20px;
+}
+
+.result-section h4 {
+  color: #34495e;
+  margin-bottom: 10px;
+  font-size: 17px;
+}
+
+.result-section ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.result-section ul li {
+  padding: 8px 15px;
+  background: white;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #2ecc71;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.medicine-link {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-left-color 0.2s;
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.medicine-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  border-left-color: #1abc9c !important;
+}
+
+.arrow {
+  color: #1abc9c;
+  font-size: 14px;
+  animation: slideRight 1s infinite alternate;
+}
+
+@keyframes slideRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(4px); }
+}
+
+.result-section p {
+  color: #555;
+  line-height: 1.6;
+}
+
+.disclaimer {
+  margin-top: 25px;
+  font-size: 13px;
+  color: #95a5a6;
+  font-style: italic;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

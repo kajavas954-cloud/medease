@@ -1,0 +1,2 @@
+/* Register.css imports everything from Login.css to stay perfectly DRY */
+@import './Login.css';

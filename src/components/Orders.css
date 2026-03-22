@@ -1,0 +1,242 @@
+/* MULTI-PAGE STABILITY BASE */
+.orders-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); /* Match Wishlist */
+  min-height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.orders-card {
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  border: 1px solid #ebf0f5;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+}
+
+/* HEADING */
+.orders-card h2 {
+  font-size: 28px;
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.orders-card p {
+  font-size: 15px;
+  color: #7f8c8d;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+/* EMPTY STATE */
+.empty-orders {
+  text-align: center;
+  padding: 20px 0;
+}
+.empty-msg {
+  color: #7f8c8d;
+  font-size: 16px;
+  margin-bottom: 25px;
+}
+
+/* ORDER LIST */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* ORDER BLOCK (SUB CARD) */
+.order-block {
+  background: #f8f9fa;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid #e1e8ed;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  transition: transform 0.2s ease;
+}
+
+.order-block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #dcdcdc;
+}
+
+.order-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  background-color: #1abc9c;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ITEMS */
+.order-items-wrapper {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.bullet {
+  color: #bdc3c7;
+  font-size: 18px;
+}
+
+.order-item-text {
+  flex: 1;
+  color: #555;
+}
+
+.order-item-price {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* FOOTER */
+.order-footer {
+  text-align: right;
+  font-size: 15px;
+  color: #7f8c8d;
+  padding-top: 10px;
+  border-top: 1px solid #e1e8ed;
+}
+
+.order-total-price {
+  font-weight: 700;
+  color: #27ae60;
+  font-size: 18px;
+  margin-left: 8px;
+}
+
+/* NEW ACTIONS */
+.order-actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap; /* allows button stacking if tight */
+}
+
+.cancel-btn, .return-btn, .reorder-btn {
+  background: white;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reorder-btn {
+  border: 1px solid #27ae60;
+  color: #27ae60;
+}
+
+.reorder-btn:hover {
+  background: #27ae60;
+  color: white;
+  box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
+}
+
+.cancel-btn {
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+}
+
+.cancel-btn:hover {
+  background: #e74c3c;
+  color: white;
+  box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
+}
+
+.return-btn {
+  border: 1px solid #1abc9c;
+  color: #1abc9c;
+}
+
+.return-btn:hover {
+  background: #1abc9c;
+  color: white;
+  box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+}
+
+.action-note {
+  font-size: 13px;
+  font-weight: 500;
+  background: #fdf5f5;
+  padding: 6px 14px;
+  border-radius: 6px;
+}
+
+.cancel-note {
+  color: #e74c3c;
+  background: #fdf5f5;
+}
+
+.return-note {
+  color: #9b59b6;
+  background: #f4ecf8;
+}
+
+/* DYNAMIC STATUS BADGES */
+.status.processing { background-color: #f39c12; }
+.status.delivered { background-color: #27ae60; }
+.status.cancelled { background-color: #e74c3c; }
+.status.return-requested { background-color: #9b59b6; }
+
+/* BACK BUTTON */
+.back-home-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background-color: transparent;
+  color: #7f8c8d;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  border: 1px solid #bdc3c7;
+}
+
+.back-home-btn:hover {
+  background-color: #f1f5f8;
+  color: #2c3e50;
+}
+
+.auto-mt {
+  margin-top: 25px;
+}
