@@ -39,7 +39,31 @@ function Cart({ setActiveTab }) {
     setCouponCode("");
   };
 
-  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const updateQuantity = (itemName, amount) => {
+    let updatedCart = [...cartItems];
+    const itemIndex = updatedCart.findIndex(i => i.name === itemName);
+    if (itemIndex !== -1) {
+      const currentQty = updatedCart[itemIndex].quantity || 1;
+      const newQty = currentQty + amount;
+      
+      if (newQty <= 0) {
+        updatedCart.splice(itemIndex, 1);
+      } else {
+        updatedCart[itemIndex].quantity = newQty;
+      }
+      
+      setCartItems(updatedCart);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+    }
+  };
+
+  const removeItem = (itemName) => {
+    const updatedCart = cartItems.filter(i => i.name !== itemName);
+    setCartItems(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
+
+  const total = cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
   const discountAmount = (total * discountPercent) / 100;
   const finalTotal = total - discountAmount;
 
@@ -69,10 +93,15 @@ function Cart({ setActiveTab }) {
                     <h4>{item.name}</h4>
                     <span className="cart-item-cat">{item.category}</span>
                   </div>
-                  <div className="cart-item-pricing">
-                    <p className="cart-item-price">₹ {item.price}</p>
-                    <span className="cart-item-delivery">🚚 Delivery in 2 days</span>
+                  <div className="cart-item-pricing" style={{alignItems: 'flex-end', gap: '8px', minWidth: '120px'}}>
+                    <p className="cart-item-price" style={{marginBottom: '5px'}}>₹ {(item.price * (item.quantity || 1)).toFixed(2)}</p>
+                    <div className="cart-qty-controls" style={{display: 'flex', alignItems: 'center', gap: '8px', background: '#f5f6fa', padding: '4px 8px', borderRadius: '6px'}}>
+                      <button onClick={() => updateQuantity(item.name, -1)} style={{border: 'none', background: '#dcdde1', borderRadius: '4px', width: '22px', cursor: 'pointer', fontWeight: 'bold'}}>-</button>
+                      <span style={{fontWeight: 'bold', fontSize: '0.9rem', minWidth: '15px', textAlign: 'center'}}>{item.quantity || 1}</span>
+                      <button onClick={() => updateQuantity(item.name, 1)} style={{border: 'none', background: '#1abc9c', color: 'white', borderRadius: '4px', width: '22px', cursor: 'pointer', fontWeight: 'bold'}}>+</button>
+                    </div>
                   </div>
+                  <button className="remove-item-btn" onClick={() => removeItem(item.name)} style={{background: '#ff7675', border: 'none', color: 'white', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', marginLeft: 'auto', height: 'fit-content', alignSelf: 'center', fontSize: '0.85rem'}}>Remove</button>
                 </div>
               ))}
             </div>
@@ -123,7 +152,10 @@ function Cart({ setActiveTab }) {
               <strong>₹ {finalTotal.toFixed(2)}</strong>
             </div>
 
-            <button className="checkout-btn" onClick={() => navigate("/payment")}>
+            <button className="checkout-btn" onClick={() => {
+              if (setActiveTab) setActiveTab("payment");
+              else navigate("/payment");
+            }}>
               Proceed to Checkout
             </button>
           </div>

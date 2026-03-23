@@ -19,7 +19,7 @@ const categoryImages = {
 /* =========================================
    DATA
    ========================================= */
-function Medicines({ searchQuery, onSearchChange }) {
+function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [localSearch, setLocalSearch] = useState("");
@@ -61,19 +61,28 @@ function Medicines({ searchQuery, onSearchChange }) {
     localStorage.setItem("wishlist", JSON.stringify(updated));
   };
 
-  const addToCart = (product) => {
+  const addToCart = (product, redirect = false) => {
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
-    const itemToAdd = {
-      ...product,
-      img: categoryImages[product.category] || categoryImages.Medicine
-    };
+    const existingItemIndex = existingCart.findIndex(item => item.name === product.name);
     
-    const updatedCart = [...existingCart, itemToAdd];
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    if (existingItemIndex !== -1) {
+      existingCart[existingItemIndex].quantity = (existingCart[existingItemIndex].quantity || 1) + 1;
+    } else {
+      existingCart.push({
+        ...product,
+        quantity: 1,
+        img: product.imageUrl || categoryImages[product.category] || categoryImages.Medicine
+      });
+    }
     
-    // Show visual feedback
-    setAddedItem(product.name);
-    setTimeout(() => setAddedItem(null), 2000);
+    localStorage.setItem("cart", JSON.stringify(existingCart));
+    
+    if (redirect) {
+      if (setActiveTab) setActiveTab("cart");
+    } else {
+      setAddedItem(product.name);
+      setTimeout(() => setAddedItem(null), 2000);
+    }
   };
 
   // Promo Slider State
@@ -217,12 +226,22 @@ function Medicines({ searchQuery, onSearchChange }) {
                 <span className="badge-cat">📁 {item.category}</span>
                 <span className="badge-expiry">⏳ Exp: {item.expiry}</span>
               </div>
-              <button 
-                onClick={() => addToCart(item)}
-                className={addedItem === item.name ? "added" : ""}
-              >
-                {addedItem === item.name ? "✓ Added" : "Add to Cart"}
-              </button>
+              <div className="medicines-card-actions" style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                <button 
+                  onClick={() => addToCart(item)}
+                  className={addedItem === item.name ? "added" : ""}
+                  style={{ flex: 1, padding: '8px 4px', fontSize: '0.9rem' }}
+                >
+                  {addedItem === item.name ? "✓ Added" : "Add to Cart"}
+                </button>
+                <button 
+                  onClick={() => addToCart(item, true)}
+                  className="buy-now-btn"
+                  style={{ flex: 1, backgroundColor: '#e67e22', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem', padding: '8px 4px' }}
+                >
+                  Buy Now
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -276,10 +295,17 @@ function Medicines({ searchQuery, onSearchChange }) {
                     {addedItem === selectedItem.name ? "✓ Added to Cart" : "Add to Cart"}
                   </button>
                   <button 
+                    className="buy-now-btn add-btn" 
+                    onClick={() => addToCart(selectedItem, true)}
+                    style={{ backgroundColor: '#e67e22' }}
+                  >
+                    Buy Now
+                  </button>
+                  <button 
                     className="modal-wishlist-btn"
                     onClick={() => toggleWishlist(selectedItem)}
                   >
-                    {wishlist.some(w => w.name === selectedItem.name) ? "❤️ Remove Wishlist" : "🤍 Save for Later"}
+                    {wishlist.some(w => w.name === selectedItem.name) ? "❤️ Remove" : "🤍 Save"}
                   </button>
                 </div>
               </div>

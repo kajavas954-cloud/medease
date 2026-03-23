@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SplashLoader from "./SplashLoader";
 import "./Register.css";
 
 function Register() {
   const navigate = useNavigate();
+  const [showSplash, setShowSplash] = useState(false);
 
-  const [registerMode, setRegisterMode] = useState("social"); // "social" or "email"
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async (e) => {
@@ -19,7 +24,7 @@ function Register() {
       const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify({ name, email, phone, password, age, gender, bloodGroup })
       });
       const data = await res.json();
 
@@ -37,7 +42,8 @@ function Register() {
         if (loginRes.ok) {
           localStorage.setItem("authToken", loginData.token);
           localStorage.setItem("registeredUser", JSON.stringify(loginData.user));
-          navigate("/home");
+          setShowSplash(true);
+          setTimeout(() => navigate("/home"), 2200);
         } else {
           alert("Account created, but auto-login failed. Please login manually.");
           navigate("/");
@@ -53,18 +59,9 @@ function Register() {
     }
   };
 
-  const handleGoogleRegister = () => {
-    const googleUser = {
-      name: "Google User",
-      email: "user@gmail.com",
-    };
-    localStorage.setItem("registeredUser", JSON.stringify(googleUser));
-    alert("Successfully registered with Google!");
-    navigate("/"); 
-  };
-
   return (
     <div className="auth-background">
+      {showSplash && <SplashLoader />}
       <div className="glass-card">
         <div className="auth-brand">
           <div className="brand-logo-icon">
@@ -79,21 +76,8 @@ function Register() {
         <h3>Create Account</h3>
         <p className="auth-subtitle">Join us for a healthier tomorrow</p>
 
-        {registerMode === "social" ? (
-          <div className="social-login-stacked">
-            <button type="button" className="social-btn-large google-btn" onClick={handleGoogleRegister}>
-               <span className="social-icon">G</span> Sign up with Google
-            </button>
-            <button type="button" className="social-btn-large email-btn" onClick={() => setRegisterMode("email")}>
-               <span className="social-icon">✉️</span> Sign up with Email
-            </button>
-          </div>
-        ) : (
-          <div className="email-login-form fade-in">
-            <button type="button" className="back-btn" onClick={() => setRegisterMode("social")}>
-              ← Back to options
-            </button>
-            <form onSubmit={handleRegister}>
+        <div className="email-login-form fade-in">
+          <form onSubmit={handleRegister}>
               <div className="input-group">
                 <span className="input-icon">👤</span>
                 <input
@@ -117,6 +101,17 @@ function Register() {
               </div>
 
               <div className="input-group">
+                <span className="input-icon">📱</span>
+                <input
+                  type="tel"
+                  placeholder="Phone Number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="input-group">
                 <span className="input-icon">🔒</span>
                 <input
                   type="password"
@@ -127,16 +122,50 @@ function Register() {
                 />
               </div>
 
+              <div className="input-group">
+                <span className="input-icon">🎂</span>
+                <input
+                  type="number"
+                  placeholder="Age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  min="1"
+                  max="120"
+                  required
+                />
+              </div>
+
+              <div className="input-group">
+                <span className="input-icon">🚻</span>
+                <select value={gender} onChange={(e) => setGender(e.target.value)} required className="form-select">
+                  <option value="" disabled>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="input-group">
+                <span className="input-icon">🩸</span>
+                <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} required className="form-select">
+                  <option value="" disabled>Select Blood Group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="Rather not say">Rather not say</option>
+                </select>
+              </div>
+
               <button type="submit" className="primary-btn mt-extra" disabled={isLoading}>
                 {isLoading ? "Creating Account..." : "Create Account"}
               </button>
             </form>
           </div>
-        )}
-
-        <div className="social-divider">
-          <span>or</span>
-        </div>
 
         <p className="auth-footer">
           Already have an account? <span className="auth-link" onClick={() => navigate("/")}>Login</span>

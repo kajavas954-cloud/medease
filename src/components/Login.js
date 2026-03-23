@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SplashLoader from "./SplashLoader";
 import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
+  const [showSplash, setShowSplash] = useState(false);
 
-  const [loginMode, setLoginMode] = useState("social"); // "social" or "email"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +28,8 @@ function Login() {
       if (res.ok) {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("registeredUser", JSON.stringify(data.user));
-        navigate("/home");
+        setShowSplash(true);
+        setTimeout(() => navigate("/home"), 2200);
       } else {
         alert(data.message || "Invalid email or password. Please try again.");
       }
@@ -38,17 +40,9 @@ function Login() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    const googleUser = {
-      name: "Google User",
-      email: "user@gmail.com",
-    };
-    localStorage.setItem("registeredUser", JSON.stringify(googleUser));
-    navigate("/home");
-  };
-
   return (
     <div className="auth-background">
+      {showSplash && <SplashLoader />}
       <div className="glass-card">
         <div className="auth-brand">
           <div className="brand-logo-icon">
@@ -63,21 +57,8 @@ function Login() {
         <h3>Welcome Back</h3>
         <p className="auth-subtitle">Login to your account</p>
 
-        {loginMode === "social" ? (
-          <div className="social-login-stacked">
-            <button type="button" className="social-btn-large google-btn" onClick={handleGoogleLogin}>
-               <span className="social-icon">G</span> Continue with Google
-            </button>
-            <button type="button" className="social-btn-large email-btn" onClick={() => setLoginMode("email")}>
-               <span className="social-icon">✉️</span> Continue with Email
-            </button>
-          </div>
-        ) : (
-          <div className="email-login-form fade-in">
-            <button type="button" className="back-btn" onClick={() => setLoginMode("social")}>
-              ← Back to options
-            </button>
-            <form onSubmit={handleLogin}>
+        <div className="email-login-form fade-in">
+          <form onSubmit={handleLogin}>
               <div className="input-group">
                 <span className="input-icon">📧</span>
                 <input
@@ -113,11 +94,6 @@ function Login() {
               </button>
             </form>
           </div>
-        )}
-
-        <div className="social-divider">
-          <span>or</span>
-        </div>
 
         <p className="auth-footer">
           New user? <span className="auth-link" onClick={() => navigate("/register")}>Create an account</span>

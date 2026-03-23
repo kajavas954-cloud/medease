@@ -96,7 +96,8 @@ body {
   pointer-events: none;
 }
 
-.glass-card input {
+.glass-card input,
+.glass-card select {
   width: 100%;
   padding: 14px 16px 14px 48px;
   border-radius: 12px;
@@ -108,13 +109,27 @@ body {
   box-sizing: border-box;
   outline: none;
   transition: all 0.3s ease;
+  appearance: none; /* Removes default browser dropdown arrow on some OS */
+}
+
+/* Add custom dropdown arrow for select */
+.glass-card select {
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.glass-card select option {
+  background: #024b40;
+  color: white;
 }
 
 .glass-card input::placeholder {
   color: rgba(255, 255, 255, 0.6);
 }
 
-.glass-card input:focus {
+.glass-card input:focus,
+.glass-card select:focus {
   background: rgba(255, 255, 255, 0.2);
   border-color: #1abc9c;
   box-shadow: 0 0 0 4px rgba(26, 188, 156, 0.3);

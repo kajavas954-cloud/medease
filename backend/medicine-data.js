@@ -1,8 +1,4 @@
-require('dotenv').config();
-const { sequelize, Medicine } = require('./models');
-
-const products = [
-  // First 17 use the AI images we successfully generated and saved locally
+module.exports = [
   { name: "Paracetamol 500mg", price: 30, category: "Medicine", rating: 4.5, reviews: 120, uses: "Relieves mild to moderate pain and reduces fever.", warning: "Do not exceed 4000mg per day. Avoid alcohol.", limit: "1-2 tablets every 4-6 hours max.", expiry: "Dec 2026", beforeUse: "Store below 25°C in a dry place.", imageUrl: "/images/medicines/paracetamol_500mg_1774028012018.png" },
   { name: "Vitamin C Tablets", price: 50, category: "Medicine", rating: 4.8, reviews: 85, uses: "Boosts immune system and treats vitamin C deficiency.", warning: "High doses may cause stomach cramps or diarrhea.", limit: "1 tablet daily after meal.", expiry: "Mar 2026", beforeUse: "Keep bottle tightly closed.", imageUrl: "/images/medicines/vitamin_c_tablets_1774028034331.png" },
   { name: "Amoxicillin", price: 80, category: "Medicine", rating: 4.2, reviews: 45, uses: "Antibiotic used to treat bacterial infections.", warning: "Requires prescription. Complete full course. May cause allergic reactions in some.", limit: "Usually 500mg every 8-12 hours.", expiry: "Oct 2025", beforeUse: "Consume full course once started.", imageUrl: "/images/medicines/amoxicillin_1774028052407.png" },
@@ -21,13 +17,13 @@ const products = [
   { name: "Moisturizing Lotion", price: 320, category: "Personal Care", rating: 4.6, reviews: 220, uses: "Hydrates and softens dry skin.", warning: "If irritation occurs, discontinue use.", limit: "Apply daily as required.", expiry: "Jan 2027", beforeUse: "Use within 12 months of opening.", imageUrl: "/images/medicines/moisturizing_lotion_1774028295234.png" },
   { name: "Surgical Mask (50pcs)", price: 250, category: "Surgicals", rating: 4.8, reviews: 1000, uses: "Provides protection against airborne particles.", warning: "Single use only. Do not wash and reuse.", limit: "Change every 4-6 hours or if soiled.", expiry: "Feb 2028", beforeUse: "Store in dry place.", imageUrl: "/images/medicines/surgical_mask_1774028314475.png" },
   
-  // The remaining 15 items use ultra high quality distinct Unsplash photography because the external AI generative API was totally blocked.
-  { name: "Crepe Bandage", price: 110, category: "Surgicals", rating: 4.1, reviews: 50, uses: "Provides support for sprains and strains.", warning: "Do not wrap too tightly; may restrict blood flow.", limit: "Use as needed until healed.", expiry: "N/A (Replace when stretched)", beforeUse: "Wash gently if reused.", imageUrl: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?q=80&w=400&fit=crop" },
-  { name: "Sterile Gauze", price: 45, category: "Surgicals", rating: 4.4, reviews: 75, uses: "For cleaning and covering wounds.", warning: "Do not use if package is opened or damaged.", limit: "Change daily or as instructed by doctor.", expiry: "Sep 2027", beforeUse: "Use immediately upon opening.", imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=400&fit=crop" },
-  { name: "Fitness Band", price: 2499, category: "Fitness", rating: 4.5, reviews: 400, uses: "Tracks steps, heart rate, and workouts.", warning: "Not a medical device. Measurements are estimates.", limit: "Wear continuously if desired.", expiry: "N/A", beforeUse: "Charge fully before first use.", imageUrl: "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b2?q=80&w=400&fit=crop" },
-  { name: "Whey Protein 1kg", price: 1899, category: "Fitness", rating: 4.9, reviews: 600, uses: "Helps in muscle building and recovery.", warning: "Consult doctor if you have kidney issues. Contains dairy.", limit: "Usually 1-2 scoops per day based on workout.", expiry: "Mar 2025", beforeUse: "Consume within 3 months of opening.", imageUrl: "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?q=80&w=400&fit=crop" },
-  { name: "Yoga Mat", price: 799, category: "Fitness", rating: 4.7, reviews: 350, uses: "Provides cushioning and non-slip surface for exercise.", warning: "Keep away from direct sharp objects or prolonged sun.", limit: "Use as needed.", expiry: "N/A", beforeUse: "Wipe with damp cloth.", imageUrl: "https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?q=80&w=400&fit=crop" },
-  { name: "Pet Shampoo", price: 299, category: "Pet Care", rating: 4.6, reviews: 120, uses: "Cleanses and deodorizes pet's coat.", warning: "Avoid contact with pets' eyes and ears.", limit: "Use once every 1-2 weeks.", expiry: "Oct 2026", beforeUse: "Dilute with water before use.", imageUrl: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=400&fit=crop" },
+  // High quality distinct Unsplash photography 
+  { name: "Crepe Bandage", price: 110, category: "Surgicals", rating: 4.1, reviews: 50, uses: "Provides support for sprains and strains.", warning: "Do not wrap too tightly; may restrict blood flow.", limit: "Use as needed until healed.", expiry: "N/A (Replace when stretched)", beforeUse: "Wash gently if reused.", imageUrl: "/images/medicines/crepe_bandage.png" },
+  { name: "Sterile Gauze", price: 45, category: "Surgicals", rating: 4.4, reviews: 75, uses: "For cleaning and covering wounds.", warning: "Do not use if package is opened or damaged.", limit: "Change daily or as instructed by doctor.", expiry: "Sep 2027", beforeUse: "Use immediately upon opening.", imageUrl: "/images/medicines/sterile_gauze.png" },
+  { name: "Fitness Band", price: 2499, category: "Fitness", rating: 4.5, reviews: 400, uses: "Tracks steps, heart rate, and workouts.", warning: "Not a medical device. Measurements are estimates.", limit: "Wear continuously if desired.", expiry: "N/A", beforeUse: "Charge fully before first use.", imageUrl: "/images/medicines/fitness_band.png" },
+  { name: "Whey Protein 1kg", price: 1899, category: "Fitness", rating: 4.9, reviews: 600, uses: "Helps in muscle building and recovery.", warning: "Consult doctor if you have kidney issues. Contains dairy.", limit: "Usually 1-2 scoops per day based on workout.", expiry: "Mar 2025", beforeUse: "Consume within 3 months of opening.", imageUrl: "/images/medicines/whey_protein.png" },
+  { name: "Yoga Mat", price: 799, category: "Fitness", rating: 4.7, reviews: 350, uses: "Provides cushioning and non-slip surface for exercise.", warning: "Keep away from direct sharp objects or prolonged sun.", limit: "Use as needed.", expiry: "N/A", beforeUse: "Wipe with damp cloth.", imageUrl: "/images/medicines/yoga_mat.png" },
+  { name: "Pet Shampoo", price: 299, category: "Pet Care", rating: 4.6, reviews: 120, uses: "Cleanses and deodorizes pet's coat.", warning: "Avoid contact with pets' eyes and ears.", limit: "Use once every 1-2 weeks.", expiry: "Oct 2026", beforeUse: "Dilute with water before use.", imageUrl: "/images/medicines/pet_shampoo.png" },
   { name: "Tick & Flea Spray", price: 450, category: "Pet Care", rating: 4.3, reviews: 90, uses: "Kills and repels ticks, fleas, and lice on pets.", warning: "Do not spray on eyes or mouth. Wash hands after use.", limit: "Apply based on product instructions.", expiry: "Nov 2025", beforeUse: "Shake vigorously.", imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=400&fit=crop" },
   { name: "Pet Multivitamins", price: 350, category: "Pet Care", rating: 4.8, reviews: 55, uses: "Supports overall pet health and immunity.", warning: "For animal use only. Keep out of reach of children.", limit: "Usually 1 tablet/syrup dose daily.", expiry: "Jul 2025", beforeUse: "Store tightly sealed.", imageUrl: "https://images.unsplash.com/photo-1548767797-d8c844163c4c?q=80&w=400&fit=crop" },
   { name: "Ayush Kadha", price: 180, category: "Ayush", rating: 4.7, reviews: 250, uses: "Ayurvedic immunity booster to fight cold/cough.", warning: "May cause mild heat in body, avoid overconsumption.", limit: "1 cup daily.", expiry: "Dec 2026", beforeUse: "Mix well in boiling water.", imageUrl: "https://images.unsplash.com/photo-1564858025217-48f07fb0b9fe?q=80&w=400&fit=crop" },
@@ -38,18 +34,3 @@ const products = [
   { name: "Ibuprofen 400mg", price: 45, category: "Medicine", rating: 4.6, reviews: 310, uses: "Relieves pain from various conditions such as headache, dental pain, menstrual cramps.", warning: "Take with food to prevent stomach upset.", limit: "Every 6-8 hours as needed. Max 3200mg/day.", expiry: "Oct 2027", beforeUse: "Store at room temperature.", imageUrl: "https://images.unsplash.com/photo-1550572017-edb79a0cfb2e?q=80&w=400&fit=crop" },
   { name: "Omeprazole 20mg", price: 55, category: "Medicine", rating: 4.8, reviews: 154, uses: "Treats certain stomach and esophagus problems (such as acid reflux, ulcers).", warning: "May take 1 to 4 days for full effect.", limit: "1 capsule daily before a meal.", expiry: "Sep 2026", beforeUse: "Do not chew or crush.", imageUrl: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=400&fit=crop" }
 ];
-
-Medicine.sync().then(async () => {
-  console.log("Database checked. Seeding data...");
-  const count = await Medicine.count();
-  if (count === 0) {
-    await Medicine.bulkCreate(products);
-    console.log("Data Seeded Successfully.");
-  } else {
-    console.log("Data already exists in DB!");
-  }
-  process.exit();
-}).catch(err => {
-  console.error("Error seeding:", err);
-  process.exit(1);
-});

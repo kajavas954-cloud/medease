@@ -24,18 +24,12 @@ function Dashboard() {
       name: savedUser?.name || "Alex Johnson",
       email: savedUser?.email || "alex.j@example.com",
       phone: savedUser?.phone || "+1 987 654 3210",
-      dob: savedUser?.dob || "1995-05-15",
-      gender: savedUser?.gender || "M",
-      bloodGroup: savedUser?.bloodGroup || "O+",
+      age: savedUser?.age || "Not Set",
+      gender: savedUser?.gender || "Not Set",
+      bloodGroup: savedUser?.bloodGroup || "Not Set",
+      profilePicUrl: savedUser?.profilePicUrl || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
     };
   });
-
-  const calculateAge = (dobString) => {
-    if (!dobString) return "--";
-    const dob = new Date(dobString);
-    const diff = Date.now() - dob.getTime();
-    return Math.abs(new Date(diff).getUTCFullYear() - 1970);
-  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -154,7 +148,7 @@ function Dashboard() {
           {showProfile && (
             <div className="profile-popup">
               <div className="profile-popup-header">
-                <img src="https://i.pravatar.cc/150?img=11" alt="User" />
+                <img src={userProfile.profilePicUrl} alt="User" />
                 <div className="profile-popup-info">
                   <h4>{userProfile.name}</h4>
                   <p>{userProfile.email}</p>
@@ -163,7 +157,7 @@ function Dashboard() {
               <div className="profile-popup-stats">
                 <div className="stat">
                   <span>Age</span>
-                  <strong>{calculateAge(userProfile.dob)}</strong>
+                  <strong>{userProfile.age}</strong>
                 </div>
                 <div className="stat">
                   <span>Gender</span>
@@ -179,7 +173,7 @@ function Dashboard() {
 
           <div className="user-profile" onClick={() => setShowProfile(!showProfile)}>
             <div className="user-profile-left">
-              <img src="https://i.pravatar.cc/150?img=11" alt="User Profile" className="user-avatar" />
+              <img src={userProfile.profilePicUrl} alt="User Profile" className="user-avatar" />
               <div className="user-info">
                 <span className="user-name">{userProfile.name}</span>
                 <span className="user-role">Patient</span>
@@ -205,12 +199,13 @@ function Dashboard() {
           <Medicines 
             searchQuery={medicineSearch} 
             onSearchChange={setMedicineSearch} 
+            setActiveTab={setActiveTab}
           />
         )}
         {activeTab === "prescription" && <Prescription />}
         {activeTab === "cart" && <Cart setActiveTab={setActiveTab} />}
-        {activeTab === "orders" && <Orders />}
-        {activeTab === "payment" && <Payment />}
+        {activeTab === "orders" && <Orders setActiveTab={setActiveTab} />}
+        {activeTab === "payment" && <Payment setActiveTab={setActiveTab} />}
         {activeTab === "adviser" && (
           <Adviser 
             onSelectMedicine={(med) => {

@@ -2,17 +2,26 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Payment.css";
 
-function Payment() {
+function Payment({ setActiveTab }) {
   const navigate = useNavigate();
   const [method, setMethod] = useState("card");
-  const [address, setAddress] = useState("123 Healthway, NY 10001");
+  const [address, setAddress] = useState("");
   const [slot, setSlot] = useState("Today, 2:00 PM - 6:00 PM");
   const [cartTotal, setCartTotal] = useState(0);
 
+  const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "", name: "" });
+  const [upiId, setUpiId] = useState("");
+  const [bank, setBank] = useState("");
+
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
     setCartTotal(total);
+
+    const user = JSON.parse(localStorage.getItem("registeredUser")) || {};
+    if (user.streetAddress) {
+      setAddress(`${user.streetAddress}, ${user.city}, ${user.state} ${user.postalCode}`);
+    }
   }, []);
 
   const handlePayment = async () => {
@@ -20,6 +29,28 @@ function Payment() {
     if (cart.length === 0) {
       alert("Your cart is empty!");
       return;
+    }
+
+    if (!address || !address.trim()) {
+      alert("Delivery Address is required. Please fill it in.");
+      return;
+    }
+
+    if (method === "card") {
+      if (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name) {
+        alert("Validation Error: Please completely fill out all Card Details (Number, Expiry, CVV, and Name).");
+        return;
+      }
+    } else if (method === "upi") {
+      if (!upiId || !upiId.trim()) {
+        alert("Validation Error: Please enter a correct UPI ID.");
+        return;
+      }
+    } else if (method === "netbanking") {
+      if (!bank || bank === "") {
+        alert("Validation Error: You must formally select a Bank from the dropdown list.");
+        return;
+      }
     }
 
     const token = localStorage.getItem("authToken");
@@ -43,7 +74,8 @@ function Payment() {
         if (res.ok) {
           localStorage.removeItem("cart");
           alert("Payment Successful! Order securely placed on backend.");
-          navigate("/orders");
+          if (setActiveTab) setActiveTab("orders");
+          else navigate("/orders");
           return;
         } else {
           console.error("Order failed on backend");
@@ -75,7 +107,8 @@ function Payment() {
     localStorage.removeItem("cart");
 
     alert("Payment Successful! Redirecting to orders...");
-    navigate("/orders");
+    if (setActiveTab) setActiveTab("orders");
+    else navigate("/orders");
   };
 
   return (
@@ -138,22 +171,22 @@ function Payment() {
               <div className="payment-forms-area">
                 {method === "card" && (
                   <div className="payment-form">
-                    <input type="text" placeholder="Card Number" maxLength="16" />
+                    <input type="text" placeholder="Card Number" maxLength="16" value={cardDetails.number} onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })} />
                     <div className="row">
-                      <input type="text" placeholder="MM / YY" maxLength="5" />
-                      <input type="password" placeholder="CVV" maxLength="3" />
+                      <input type="text" placeholder="MM / YY" maxLength="5" value={cardDetails.expiry} onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })} />
+                      <input type="password" placeholder="CVV" maxLength="3" value={cardDetails.cvv} onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })} />
                     </div>
-                    <input type="text" placeholder="Card Holder Name" />
+                    <input type="text" placeholder="Card Holder Name" value={cardDetails.name} onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })} />
                   </div>
                 )}
                 {method === "upi" && (
                   <div className="payment-form">
-                    <input type="text" placeholder="Enter UPI ID (e.g. name@bank)" />
+                    <input type="text" placeholder="Enter UPI ID (e.g. name@bank)" value={upiId} onChange={(e) => setUpiId(e.target.value)} />
                   </div>
                 )}
                 {method === "netbanking" && (
                   <div className="payment-form">
-                    <select defaultValue="">
+                    <select value={bank} onChange={(e) => setBank(e.target.value)}>
                       <option value="" disabled>Select your Bank</option>
                       <option value="sbi">SBI</option>
                       <option value="hdfc">HDFC</option>
