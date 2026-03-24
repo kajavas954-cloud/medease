@@ -13,7 +13,7 @@ const filesToCopy = [
   'azithromycin_500mg_1774330507464.png',
   'cough_syrup_1774330635771.png',
   'pantoprazole_40mg_1774330669681.png',
-  'vitamin_d3_capsules_1774330733422.png',
+  'vitamin_d3_capsules_1774330733422.png', 
   'weight_scale_1774330746990.png'
 ];
 
