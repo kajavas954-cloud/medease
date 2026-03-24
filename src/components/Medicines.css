@@ -1,5 +1,4 @@
-.medicines-page {
-}
+
 .medicines-container {
   background: white;
   padding: 30px;
@@ -51,7 +50,7 @@
 .search-bar:focus {
   background: #ffffff;
   border-color: #1abc9c;
-  box-shadow: 0 0 0 4px rgba(26, 188, 156, 0.15);
+  box-shadow: 0 4px 15px rgba(26,188,156,0.3);
 }
 .category-dashboard {
   display: flex;
@@ -587,3 +586,5 @@
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+

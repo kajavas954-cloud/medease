@@ -1,24 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import "./Medicines.css";
 
-/* =========================================
-   ANIMATED CATEGORY SVG (OFFLINE & SAFE)
-   ========================================= */
-// Image assets mapped to categories
 const categoryImages = {
-  Medicine: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=2070&auto=format&fit=crop", // Medicine bottle
-  Device: "https://images.unsplash.com/photo-1583946210796-c4d9da09516c?q=80&w=2070&auto=format&fit=crop", // Medical devices
-  "Personal Care": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=1974&auto=format&fit=crop", // Skin care
-  Surgicals: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2070&auto=format&fit=crop", // Mask/Gloves
-  Fitness: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop", // Fitness gear
-  "Pet Care": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=2069&auto=format&fit=crop", // Dog medicine/care
-  Ayush: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2020&auto=format&fit=crop", // Yoga/Herbal
-  Homeopathy: "https://images.unsplash.com/photo-1612061483321-715bd0ee7949?q=80&w=1974&auto=format&fit=crop" // Homeopathy bottles
+  Medicine: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=2070&auto=format&fit=crop",
+  Device: "https://images.unsplash.com/photo-1583946210796-c4d9da09516c?q=80&w=2070&auto=format&fit=crop",
+  "Personal Care": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=1974&auto=format&fit=crop",
+  Surgicals: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2070&auto=format&fit=crop",
+  Fitness: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop",
+  "Pet Care": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=2069&auto=format&fit=crop",
+  Ayush: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2020&auto=format&fit=crop",
+  Homeopathy: "https://images.unsplash.com/photo-1612061483321-715bd0ee7949?q=80&w=1974&auto=format&fit=crop"
 };
 
-/* =========================================
-   DATA
-   ========================================= */
 function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,8 +40,16 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
   const [category, setCategory] = useState("All");
   const [addedItem, setAddedItem] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const location = useLocation();
   
-  // Wishlist state
+  useEffect(() => {
+    if (location.state && location.state.openProduct) {
+      setSelectedItem(location.state.openProduct);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+  
   const [wishlist, setWishlist] = useState(() => JSON.parse(localStorage.getItem("wishlist")) || []);
   
   const toggleWishlist = (product) => {
@@ -76,6 +78,7 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
     }
     
     localStorage.setItem("cart", JSON.stringify(existingCart));
+    window.dispatchEvent(new Event('cartUpdated'));
     
     if (redirect) {
       if (setActiveTab) setActiveTab("cart");
@@ -85,7 +88,6 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
     }
   };
 
-  // Promo Slider State
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = [
     {
@@ -121,7 +123,6 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
   return (
     <div className="medicines-page">
       <div className="medicines-container">
-        
         <div className="sticky-dashboard-header">
           <h2>Medicines & Healthcare</h2>
 
@@ -142,6 +143,7 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
               { name: "Device", icon: "🩺" },
               { name: "Personal Care", icon: "🧴" },
               { name: "Surgicals", icon: "🧤" },
+              { name: "First Aid", icon: "🚑" },
               { name: "Fitness", icon: "🏋️" },
               { name: "Pet Care", icon: "🐾" },
               { name: "Ayush", icon: "🌿" },
@@ -161,7 +163,6 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
           </div>
         </div>
 
-        {/* Promotional Sliding Banner */}
         <div className="promo-slider">
           <div 
             className="slides-wrapper" 
@@ -190,8 +191,6 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
             ))}
           </div>
         </div>
-
-
 
         {loading ? (
            <div style={{ textAlign: "center", padding: "80px", color: "white", width: "100%" }}>
@@ -248,7 +247,6 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
         )}
       </div>
 
-      {/* MODAL */}
       {selectedItem && (
         <div className="medicine-modal-overlay" onClick={() => setSelectedItem(null)}>
           <div className="medicine-modal" onClick={e => e.stopPropagation()}>

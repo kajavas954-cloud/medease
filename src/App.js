@@ -8,6 +8,7 @@ import Cart from "./components/Cart";
 import Payment from "./components/Payment";
 import PaymentSuccess from "./components/PaymentSuccess";
 import Orders from "./components/Orders";
+import Chatbot from "./components/Chatbot";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/orders" element={<Orders />} />
       </Routes>
+      <Chatbot />
     </BrowserRouter>
   );
 }

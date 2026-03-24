@@ -36,6 +36,7 @@ function Wishlist() {
     
     const updatedCart = [...existingCart, itemToAdd];
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event('cartUpdated'));
     
     setAddedItem(product.name);
     setTimeout(() => setAddedItem(null), 2000);

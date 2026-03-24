@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Medicines from "./Medicines";
 import Cart from "./Cart";
@@ -9,6 +9,7 @@ import Adviser from "./Adviser";
 import Prescription from "./Prescription";
 import Settings from "./Settings";
 import Overview from "./Overview";
+import Footer from "./Footer";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -17,6 +18,31 @@ function Dashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [showBrandDetails, setShowBrandDetails] = useState(false);
   const navigate = useNavigate();
+
+  const [cartCount, setCartCount] = useState(0);
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo(0, 0);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+      setCartCount(cartItems.length);
+    };
+    
+    updateCartCount();
+    window.addEventListener('cartUpdated', updateCartCount);
+    window.addEventListener('storage', updateCartCount);
+    
+    return () => {
+      window.removeEventListener('cartUpdated', updateCartCount);
+      window.removeEventListener('storage', updateCartCount);
+    };
+  }, []);
 
   const [userProfile, setUserProfile] = useState(() => {
     const savedUser = JSON.parse(localStorage.getItem("registeredUser"));
@@ -98,10 +124,18 @@ function Dashboard() {
           </button>
 
           <button
-            className={activeTab === "cart" ? "active" : ""}
+            className={`cart-btn-wrap ${activeTab === "cart" ? "active" : ""}`}
             onClick={() => setActiveTab("cart")}
           >
-            🛒 Cart
+            <span className="cart-icon-container">
+              🛒
+              {cartCount > 0 && (
+                <span className="cart-badge-global" key={cartCount}>
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </span>
+            <span className="cart-text-spacing">Cart</span>
           </button>
 
           <button
@@ -193,7 +227,7 @@ function Dashboard() {
           </span>
         </div>
 
-        <div className="dashboard-content">
+        <div className="dashboard-content" ref={contentRef}>
         {activeTab === "overview" && <Overview userProfile={userProfile} setActiveTab={setActiveTab} setUserProfile={setUserProfile} />}
         {activeTab === "medicines" && (
           <Medicines 
@@ -216,6 +250,8 @@ function Dashboard() {
         )}
         {activeTab === "wishlist" && <Wishlist />}
         {activeTab === "settings" && <Settings userProfile={userProfile} setUserProfile={setUserProfile} />}
+        
+        <Footer />
         </div>
       </div>
     </div>

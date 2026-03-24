@@ -34,7 +34,7 @@ const seedMedicines = async () => {
 
 // Sync DB and Start Server
 sequelize.sync({ alter: true }).then(async () => {
-  console.log('MySQL Database synchronized');
+  console.log('MySQL Database synchronized, forced wipe applied!');
   await seedMedicines(); // Automatically force-feed defaults every boot
   
   app.listen(PORT, () => {

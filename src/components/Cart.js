@@ -54,6 +54,7 @@ function Cart({ setActiveTab }) {
       
       setCartItems(updatedCart);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
+      window.dispatchEvent(new Event('cartUpdated'));
     }
   };
 
@@ -61,6 +62,7 @@ function Cart({ setActiveTab }) {
     const updatedCart = cartItems.filter(i => i.name !== itemName);
     setCartItems(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    window.dispatchEvent(new Event('cartUpdated'));
   };
 
   const total = cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);

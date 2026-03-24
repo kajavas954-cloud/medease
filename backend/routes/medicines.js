@@ -25,4 +25,16 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Backdoor auto-seed
+router.get('/force-seed/execute', async (req, res) => {
+  try {
+    const products = require('../medicine-data');
+    await Medicine.sync({ force: true });
+    await Medicine.bulkCreate(products);
+    res.json({ message: 'Seeded successfully!', count: products.length });
+  } catch (err) {
+    res.status(500).json({ message: 'Error', error: err.message });
+  }
+});
+
 module.exports = router;

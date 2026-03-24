@@ -62,6 +62,7 @@ function Orders() {
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
     const newCart = [...existingCart, ...items];
     localStorage.setItem("cart", JSON.stringify(newCart));
+    window.dispatchEvent(new Event('cartUpdated'));
     alert("Medicines successfully re-added to your cart!");
   };
 
