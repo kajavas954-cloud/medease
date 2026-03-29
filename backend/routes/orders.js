@@ -22,7 +22,8 @@ router.post('/', auth, async (req, res) => {
       orderId: order.id,
       medicineId: item.medicineId,
       quantity: item.quantity,
-      priceAtTime: item.priceAtTime
+      priceAtTime: item.priceAtTime,
+      prescriptionUrl: item.prescriptionUrl || null
     }));
 
     await OrderItem.bulkCreate(orderItems);

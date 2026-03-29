@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useToast } from "./ToastProvider";
 import "./Overview.css";
 
 function Overview({ userProfile, setActiveTab, setUserProfile }) {
+  const toast = useToast();
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -28,7 +30,7 @@ function Overview({ userProfile, setActiveTab, setUserProfile }) {
         const savedUser = JSON.parse(localStorage.getItem("registeredUser")) || {};
         localStorage.setItem("registeredUser", JSON.stringify({ ...savedUser, ...updatedUser }));
       }
-      alert("🎉 Payment Successful! Welcome to MedEase Prime.");
+      toast("🎉 Welcome to MedEase Prime!");
     }, 2000);
   };
 

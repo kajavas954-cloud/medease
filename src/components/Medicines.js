@@ -40,8 +40,24 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
   const [category, setCategory] = useState("All");
   const [addedItem, setAddedItem] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [pendingCartItem, setPendingCartItem] = useState(null);
+  const [prescriptionFile, setPrescriptionFile] = useState(null);
+  const [prescriptionRedirect, setPrescriptionRedirect] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+  
+  useEffect(() => {
+    const scrollContainer = document.querySelector('.dashboard-content') || window;
+    const handleScroll = () => {
+      const scrollY = scrollContainer === window ? window.scrollY : scrollContainer.scrollTop;
+      setIsScrolled(scrollY > 20);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
   
   useEffect(() => {
     if (location.state && location.state.openProduct) {
@@ -63,17 +79,29 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
     localStorage.setItem("wishlist", JSON.stringify(updated));
   };
 
-  const addToCart = (product, redirect = false) => {
+  const addToCartFlow = (product, redirect = false) => {
+    if (product.requiresPrescription) {
+      setPendingCartItem(product);
+      setPrescriptionRedirect(redirect);
+      setShowPrescriptionModal(true);
+      return;
+    }
+    executeAddToCart(product, null, redirect);
+  };
+
+  const executeAddToCart = (product, prescriptionUrl = null, redirect = false) => {
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
     const existingItemIndex = existingCart.findIndex(item => item.name === product.name);
     
     if (existingItemIndex !== -1) {
       existingCart[existingItemIndex].quantity = (existingCart[existingItemIndex].quantity || 1) + 1;
+      if (prescriptionUrl) existingCart[existingItemIndex].prescriptionUrl = prescriptionUrl;
     } else {
       existingCart.push({
         ...product,
         quantity: 1,
-        img: product.imageUrl || categoryImages[product.category] || categoryImages.Medicine
+        img: product.imageUrl || categoryImages[product.category] || categoryImages.Medicine,
+        prescriptionUrl: prescriptionUrl
       });
     }
     
@@ -86,6 +114,19 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
       setAddedItem(product.name);
       setTimeout(() => setAddedItem(null), 2000);
     }
+  };
+
+  const handleUploadPrescription = (e) => {
+    e.preventDefault();
+    if (!prescriptionFile) return;
+    
+    // Create a mock localized URL for the file attachment
+    const mockUrl = "local_mock_" + prescriptionFile.name;
+    executeAddToCart(pendingCartItem, mockUrl, prescriptionRedirect);
+    
+    setShowPrescriptionModal(false);
+    setPendingCartItem(null);
+    setPrescriptionFile(null);
   };
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -123,8 +164,8 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
   return (
     <div className="medicines-page">
       <div className="medicines-container">
-        <div className="sticky-dashboard-header">
-          <h2>Medicines & Healthcare</h2>
+        <div className={`sticky-dashboard-header ${isScrolled ? 'scrolled' : ''}`}>
+          {/* <h2>Medicines & Healthcare</h2> */}
 
           <div className="search-wrapper">
             <span className="search-icon">🔍</span>
@@ -136,30 +177,40 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
             />
           </div>
 
-          <div className="category-dashboard">
-            {[
-              { name: "All", icon: "💠" },
-              { name: "Medicine", icon: "💊" },
-              { name: "Device", icon: "🩺" },
-              { name: "Personal Care", icon: "🧴" },
-              { name: "Surgicals", icon: "🧤" },
-              { name: "First Aid", icon: "🚑" },
-              { name: "Fitness", icon: "🏋️" },
-              { name: "Pet Care", icon: "🐾" },
-              { name: "Ayush", icon: "🌿" },
-              { name: "Homeopathy", icon: "🧪" }
-            ].map((cat) => (
-              <div 
-                key={cat.name} 
-                className={`category-dash-card ${category === cat.name ? "active" : ""}`} 
-                onClick={() => setCategory(cat.name)}
-              >
-                <div className="cat-dash-icon">{cat.icon}</div>
-                <div className="cat-dash-info">
-                  <h4>{cat.name}</h4>
+          <div className="category-scroll-wrapper">
+            <button className="scroll-arrow left" onClick={() => {
+              document.querySelector('.category-dashboard').scrollBy({ left: -200, behavior: 'smooth' });
+            }}>&#8249;</button>
+            
+            <div className="category-dashboard">
+              {[
+                { name: "All", icon: "💠" },
+                { name: "Medicine", icon: "💊" },
+                { name: "Device", icon: "🩺" },
+                { name: "Personal Care", icon: "🧴" },
+                { name: "Surgicals", icon: "🧤" },
+                { name: "First Aid", icon: "🚑" },
+                { name: "Fitness", icon: "🏋️" },
+                { name: "Pet Care", icon: "🐾" },
+                { name: "Ayush", icon: "🌿" },
+                { name: "Homeopathy", icon: "🧪" }
+              ].map((cat) => (
+                <div 
+                  key={cat.name} 
+                  className={`category-dash-card ${category === cat.name ? "active" : ""}`} 
+                  onClick={() => setCategory(cat.name)}
+                >
+                  <div className="cat-dash-icon">{cat.icon}</div>
+                  <div className="cat-dash-info">
+                    <h4>{cat.name}</h4>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            <button className="scroll-arrow right" onClick={() => {
+              document.querySelector('.category-dashboard').scrollBy({ left: 200, behavior: 'smooth' });
+            }}>&#8250;</button>
           </div>
         </div>
 
@@ -223,22 +274,34 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
               <p className="price">₹ {item.price}</p>
               <div className="card-badges">
                 <span className="badge-cat">📁 {item.category}</span>
-                <span className="badge-expiry">⏳ Exp: {item.expiry}</span>
+                <span className="badge-expiry">⏳ Exp: {item.expiry || "2027"}</span>
+                {item.requiresPrescription && (
+                  <span className="badge-prescription" style={{ background: '#fdf5f5', color: '#e74c3c', padding: '4px 10px', borderRadius: '50px', fontSize: '11px', fontWeight: 'bold' }}>⚠️ Rx Required</span>
+                )}
+                {item.stockQuantity <= 0 ? (
+                  <span className="badge-stock out-of-stock">❌ Out of Stock</span>
+                ) : item.stockQuantity <= 10 ? (
+                  <span className="badge-stock low-stock">⚠️ Only {item.stockQuantity} left</span>
+                ) : (
+                  <span className="badge-stock in-stock">✅ {item.stockQuantity} in stock</span>
+                )}
               </div>
               <div className="medicines-card-actions" style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
                 <button 
-                  onClick={() => addToCart(item)}
-                  className={addedItem === item.name ? "added" : ""}
+                  onClick={() => addToCartFlow(item)}
+                  disabled={item.stockQuantity <= 0}
+                  className={`${addedItem === item.name ? "added" : ""} ${item.stockQuantity <= 0 ? "disabled-btn" : ""}`}
                   style={{ flex: 1, padding: '8px 4px', fontSize: '0.9rem' }}
                 >
-                  {addedItem === item.name ? "✓ Added" : "Add to Cart"}
+                  {item.stockQuantity <= 0 ? "Out of Stock" : (addedItem === item.name ? "✓ Added" : "Add to Cart")}
                 </button>
                 <button 
-                  onClick={() => addToCart(item, true)}
-                  className="buy-now-btn"
-                  style={{ flex: 1, backgroundColor: '#e67e22', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.9rem', padding: '8px 4px' }}
+                  onClick={() => addToCartFlow(item, true)}
+                  disabled={item.stockQuantity <= 0}
+                  className={`buy-now-btn ${item.stockQuantity <= 0 ? "disabled-btn" : ""}`}
+                  style={{ flex: 1, backgroundColor: item.stockQuantity <= 0 ? '#bdc3c7' : '#e67e22', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: item.stockQuantity <= 0 ? 'not-allowed' : 'pointer', fontSize: '0.9rem', padding: '8px 4px' }}
                 >
-                  Buy Now
+                  {item.stockQuantity <= 0 ? "Unavailable" : "Buy Now"}
                 </button>
               </div>
             </div>
@@ -283,21 +346,33 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
                   <div className="detail-item">
                     <strong>💡 Best Before Use:</strong> <p>{selectedItem.beforeUse}</p>
                   </div>
+                  <div className="detail-item">
+                    <strong>📦 Availability:</strong> 
+                    <p style={{ 
+                      color: selectedItem.stockQuantity <= 0 ? '#e74c3c' : (selectedItem.stockQuantity <= 10 ? '#f39c12' : '#27ae60'),
+                      fontWeight: 'bold'
+                    }}>
+                      {selectedItem.stockQuantity <= 0 ? "Currently Out of Stock" : 
+                       (selectedItem.stockQuantity <= 10 ? `Low Stock: Only ${selectedItem.stockQuantity} remaining` : `${selectedItem.stockQuantity} Units available`)}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="modal-actions">
                   <button 
-                    className={addedItem === selectedItem.name ? "add-btn added" : "add-btn"} 
-                    onClick={() => addToCart(selectedItem)}
+                    className={addedItem === selectedItem.name ? "add-btn added" : (selectedItem.stockQuantity <= 0 ? "add-btn disabled-btn" : "add-btn")} 
+                    disabled={selectedItem.stockQuantity <= 0}
+                    onClick={() => addToCartFlow(selectedItem)}
                   >
-                    {addedItem === selectedItem.name ? "✓ Added to Cart" : "Add to Cart"}
+                    {selectedItem.stockQuantity <= 0 ? "Out of Stock" : (addedItem === selectedItem.name ? "✓ Added to Cart" : "Add to Cart")}
                   </button>
                   <button 
                     className="buy-now-btn add-btn" 
-                    onClick={() => addToCart(selectedItem, true)}
-                    style={{ backgroundColor: '#e67e22' }}
+                    disabled={selectedItem.stockQuantity <= 0}
+                    onClick={() => addToCartFlow(selectedItem, true)}
+                    style={{ backgroundColor: selectedItem.stockQuantity <= 0 ? '#bdc3c7' : '#e67e22', cursor: selectedItem.stockQuantity <= 0 ? 'not-allowed' : 'pointer' }}
                   >
-                    Buy Now
+                    {selectedItem.stockQuantity <= 0 ? "Sold Out" : "Buy Now"}
                   </button>
                   <button 
                     className="modal-wishlist-btn"
@@ -308,6 +383,39 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prescription Upload Interceptor Modal */}
+      {showPrescriptionModal && pendingCartItem && (
+        <div className="medicine-modal-overlay">
+          <div className="medicine-modal" style={{ maxWidth: '420px', padding: '30px' }}>
+            <button className="close-modal" onClick={() => { setShowPrescriptionModal(false); setPendingCartItem(null); setPrescriptionFile(null); }}>✖</button>
+            <h2 style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '24px' }}>⚠️</span> Rx Required
+            </h2>
+            <p style={{ color: '#555', marginBottom: '20px', fontSize: '14px', lineHeight: '1.5' }}>
+              <strong>{pendingCartItem.name}</strong> is a restricted prescription drug. Please upload a valid doctor's note or prescription file to proceed safely.
+            </p>
+            <form onSubmit={handleUploadPrescription}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600' }}>Select PDF or Image 📄</label>
+                <input 
+                  type="file" 
+                  accept="image/*,.pdf" 
+                  required 
+                  onChange={(e) => setPrescriptionFile(e.target.files[0])}
+                  style={{ width: '100%', padding: '12px', border: '2px dashed #1abc9c', borderRadius: '8px', cursor: 'pointer', background: '#f8f9fa' }}
+                />
+              </div>
+              <button 
+                type="submit" 
+                style={{ width: '100%', background: '#1abc9c', color: 'white', padding: '14px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px', transition: 'background 0.2s' }}
+              >
+                Upload & Continue
+              </button>
+            </form>
           </div>
         </div>
       )}

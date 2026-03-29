@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Chatbot.css";
 
 const Chatbot = () => {
@@ -12,6 +12,7 @@ const Chatbot = () => {
   const [hasGreeted, setHasGreeted] = useState(false);
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Load backend data securely for AI native parsing
   useEffect(() => {
@@ -199,6 +200,10 @@ const Chatbot = () => {
   };
 
   const quickReplies = ["Cold & Cough", "Pet Care", "Fitness", "Track Order", "Digestion"];
+
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <div className="chatbot-container">

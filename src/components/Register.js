@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SplashLoader from "./SplashLoader";
+import { useToast } from "./ToastProvider";
 import "./Register.css";
 
 function Register() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [showSplash, setShowSplash] = useState(false);
 
   const [name, setName] = useState("");
@@ -45,17 +47,17 @@ function Register() {
           setShowSplash(true);
           setTimeout(() => navigate("/home"), 2200);
         } else {
-          alert("Account created, but auto-login failed. Please login manually.");
+          toast("Account created, but auto-login failed. Please login manually.", "info");
           navigate("/");
         }
       } else {
         setIsLoading(false);
-        alert(data.message || "Registration failed. Please try again.");
+        toast(data.message || "Registration failed. Please try again.", "error");
       }
     } catch (error) {
       console.error(error);
       setIsLoading(false);
-      alert("Server is unreachable. Please try again later.");
+      toast("Server is unreachable. Please try again later.", "error");
     }
   };
 

@@ -52,15 +52,30 @@
   border-color: #1abc9c;
   box-shadow: 0 4px 15px rgba(26,188,156,0.3);
 }
-.category-dashboard {
+.category-scroll-wrapper {
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  align-items: center;
   margin-bottom: 15px;
   width: 100%;
 }
+
+.category-dashboard {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+.category-dashboard::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
 .category-dash-card {
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -93,10 +108,35 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  transform-origin: top;
+  max-height: 30px;
 }
 
 .category-dash-card.active .cat-dash-icon {
   filter: drop-shadow(0 2px 4px rgba(26, 188, 156, 0.3));
+}
+
+.sticky-dashboard-header {
+  transition: all 0.3s ease;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.sticky-dashboard-header.scrolled {
+  padding-top: 15px;
+  padding-bottom: 10px;
+}
+
+.sticky-dashboard-header.scrolled .cat-dash-icon {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+  transform: scaleY(0);
+}
+
+.sticky-dashboard-header.scrolled .category-dash-card {
+  padding: 10px 15px;
+  border-radius: 12px;
 }
 
 .cat-dash-info h4 {
@@ -111,28 +151,47 @@
   color: #024b40;
 }
 
-/* Responsiveness for smaller screens to make cards wrap nicely */
-@media (max-width: 1100px) {
-  .category-dashboard {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-  .category-dash-card {
-    flex: 0 0 calc(25% - 12px);
-  }
+/* Responsiveness removed in favor of horizontal scroll */
+
+.scroll-arrow {
+  position: absolute;
+  top: calc(50% - 5px); /* Offset perfectly counteracting the padding-bottom of 10px on the track */
+  transform: translateY(-50%);
+  z-index: 10;
+  background: white;
+  border: 1px solid #eef2f5;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  color: #2c3e50;
+  transition: all 0.2s;
 }
 
-@media (max-width: 768px) {
-  .category-dash-card {
-    flex: 0 0 calc(33.333% - 12px);
-  }
+.scroll-arrow:hover {
+  background: #1abc9c;
+  color: white;
+  border-color: #1abc9c;
 }
 
-@media (max-width: 480px) {
-  .category-dash-card {
-    flex: 0 0 calc(50% - 12px);
-  }
+.scroll-arrow:active {
+  transform: translateY(-50%) scale(0.9);
 }
+
+.scroll-arrow.left {
+  left: -20px;
+}
+
+.scroll-arrow.right {
+  right: -20px;
+}
+
 .promo-slider {
   width: 100%;
   border-radius: 16px;
@@ -336,6 +395,41 @@
 .badge-expiry {
   background: #fdf5f5;
   color: #e74c3c;
+}
+
+.badge-stock {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.badge-stock.in-stock {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-stock.low-stock {
+  background: #fff3e0;
+  color: #ef6c00;
+  border: 1px solid #ffe0b2;
+}
+
+.badge-stock.out-of-stock {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.disabled-btn {
+  background: #bdc3c7 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .medicine-card button {

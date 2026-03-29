@@ -220,12 +220,12 @@ function Dashboard() {
 
       {/* MAIN CONTENT AREA */}
       <div className="dashboard-main-area">
-        <div className="minimal-topbar">
+        {/* <div className="minimal-topbar">
           <h2 className="topbar-title">MedEase Portal</h2>
           <span className="topbar-date">
             {new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
           </span>
-        </div>
+        </div> */}
 
         <div className="dashboard-content" ref={contentRef}>
         {activeTab === "overview" && <Overview userProfile={userProfile} setActiveTab={setActiveTab} setUserProfile={setUserProfile} />}

@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
     priceAtTime: {
       type: DataTypes.FLOAT,
       allowNull: false
+    },
+    prescriptionUrl: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   });
   return OrderItem;

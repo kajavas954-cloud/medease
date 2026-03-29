@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "./ToastProvider";
 import "./Payment.css";
 
 function Payment({ setActiveTab }) {
   const navigate = useNavigate();
+  const toast = useToast();
   const [method, setMethod] = useState("card");
   const [address, setAddress] = useState("");
   const [slot, setSlot] = useState("Today, 2:00 PM - 6:00 PM");
@@ -27,28 +29,28 @@ function Payment({ setActiveTab }) {
   const handlePayment = async () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     if (cart.length === 0) {
-      alert("Your cart is empty!");
+      toast("Your cart is empty!", "error");
       return;
     }
 
     if (!address || !address.trim()) {
-      alert("Delivery Address is required. Please fill it in.");
+      toast("Delivery Address is required. Please fill it in.", "error");
       return;
     }
 
     if (method === "card") {
       if (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name) {
-        alert("Validation Error: Please completely fill out all Card Details (Number, Expiry, CVV, and Name).");
+        toast("Please fill out all Card Details (Number, Expiry, CVV, and Name).", "error");
         return;
       }
     } else if (method === "upi") {
       if (!upiId || !upiId.trim()) {
-        alert("Validation Error: Please enter a correct UPI ID.");
+        toast("Please enter a valid UPI ID.", "error");
         return;
       }
     } else if (method === "netbanking") {
       if (!bank || bank === "") {
-        alert("Validation Error: You must formally select a Bank from the dropdown list.");
+        toast("Please select a Bank from the dropdown.", "error");
         return;
       }
     }
@@ -64,7 +66,7 @@ function Payment({ setActiveTab }) {
             "x-auth-token": token
           },
           body: JSON.stringify({
-            items: cart.map(c => ({ medicineId: c.id || 1, quantity: 1, priceAtTime: c.price })),
+            items: cart.map(c => ({ medicineId: c.id || 1, quantity: c.quantity || 1, priceAtTime: c.price, prescriptionUrl: c.prescriptionUrl || null })),
             address,
             deliveryTimeSlot: slot,
             totalAmount: cartTotal
@@ -73,7 +75,7 @@ function Payment({ setActiveTab }) {
         
         if (res.ok) {
           localStorage.removeItem("cart");
-          alert("Payment Successful! Order securely placed on backend.");
+          toast("Payment Successful! Order placed.");
           if (setActiveTab) setActiveTab("orders");
           else navigate("/orders");
           return;
@@ -106,7 +108,7 @@ function Payment({ setActiveTab }) {
     localStorage.setItem("orders", JSON.stringify(orders));
     localStorage.removeItem("cart");
 
-    alert("Payment Successful! Redirecting to orders...");
+    toast("Payment Successful!");
     if (setActiveTab) setActiveTab("orders");
     else navigate("/orders");
   };

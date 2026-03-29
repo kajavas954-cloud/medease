@@ -51,6 +51,14 @@ module.exports = (sequelize, DataTypes) => {
     profilePicUrl: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    resetPasswordOtp: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    resetPasswordExpires: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   });
   return User;

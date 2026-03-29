@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "./ToastProvider";
 import "./Cart.css";
 
 function Cart({ setActiveTab }) {
   const navigate = useNavigate();
+  const toast = useToast();
   const [cartItems, setCartItems] = useState([]);
   const [couponCode, setCouponCode] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -24,13 +26,13 @@ function Cart({ setActiveTab }) {
     const code = couponCode.trim().toUpperCase();
     if (code === "CARE10") {
       setDiscountPercent(10);
-      alert("10% Discount applied!");
+      toast("10% Discount applied!");
     } else if (code === "SAVE20") {
       setDiscountPercent(20);
-      alert("20% Discount applied!");
+      toast("20% Discount applied!");
     } else {
       setDiscountPercent(0);
-      alert("Invalid or Expired Coupon");
+      toast("Invalid or Expired Coupon", "error");
     }
   };
 
@@ -94,6 +96,11 @@ function Cart({ setActiveTab }) {
                   <div className="cart-item-info">
                     <h4>{item.name}</h4>
                     <span className="cart-item-cat">{item.category}</span>
+                    {item.prescriptionUrl && (
+                      <div style={{ marginTop: '8px', fontSize: '11px', color: '#27ae60', background: '#eafaf1', padding: '4px 8px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px', border: '1px solid #c8e6c9' }}>
+                        <span style={{ fontSize: '14px' }}>✓</span> Rx Attached
+                      </div>
+                    )}
                   </div>
                   <div className="cart-item-pricing" style={{alignItems: 'flex-end', gap: '8px', minWidth: '120px'}}>
                     <p className="cart-item-price" style={{marginBottom: '5px'}}>₹ {(item.price * (item.quantity || 1)).toFixed(2)}</p>

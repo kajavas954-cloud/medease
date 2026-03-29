@@ -17,10 +17,15 @@ db.User = require('./User')(sequelize, Sequelize);
 db.Medicine = require('./Medicine')(sequelize, Sequelize);
 db.Order = require('./Order')(sequelize, Sequelize);
 db.OrderItem = require('./OrderItem')(sequelize, Sequelize);
+db.SupportTicket = require('./SupportTicket')(sequelize, Sequelize);
+db.Prescription = require('./Prescription')(sequelize, Sequelize);
 
 // Define Associations
 db.User.hasMany(db.Order, { foreignKey: 'userId' });
 db.Order.belongsTo(db.User, { foreignKey: 'userId' });
+
+db.User.hasMany(db.Prescription, { foreignKey: 'userId' });
+db.Prescription.belongsTo(db.User, { foreignKey: 'userId' });
 
 db.Order.hasMany(db.OrderItem, { foreignKey: 'orderId' });
 db.OrderItem.belongsTo(db.Order, { foreignKey: 'orderId' });

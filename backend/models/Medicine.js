@@ -10,7 +10,9 @@ module.exports = (sequelize, DataTypes) => {
     limit: { type: DataTypes.STRING },
     expiry: { type: DataTypes.STRING },
     beforeUse: { type: DataTypes.STRING },
-    imageUrl: { type: DataTypes.STRING } // Useful if we allow custom images
+    imageUrl: { type: DataTypes.STRING },
+    requiresPrescription: { type: DataTypes.BOOLEAN, defaultValue: false },
+    stockQuantity: { type: DataTypes.INTEGER, defaultValue: 0 }
   });
   return Medicine;
 };

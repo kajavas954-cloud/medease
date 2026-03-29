@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useToast } from "./ToastProvider";
 import "./Settings.css";
 
 function Settings({ userProfile, setUserProfile }) {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState("personal");
 
   const [formData, setFormData] = useState({ 
@@ -45,17 +47,17 @@ function Settings({ userProfile, setUserProfile }) {
       });
       const data = await res.json();
       if (res.ok) {
-        alert("✅ " + data.message);
+        toast(data.message);
         const savedUser = JSON.parse(localStorage.getItem("registeredUser")) || {};
         const updatedUser = { ...savedUser, ...addressData };
         localStorage.setItem("registeredUser", JSON.stringify(updatedUser));
         if (setUserProfile) setUserProfile(updatedUser);
       } else {
-        alert("❌ " + (data.message || "Failed to update address."));
+        toast(data.message || "Failed to update address.", "error");
       }
     } catch (err) {
       console.error(err);
-      alert("❌ Server is unreachable.");
+      toast("Server is unreachable.", "error");
     } finally {
       setAddressLoading(false);
     }
@@ -75,11 +77,11 @@ function Settings({ userProfile, setUserProfile }) {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("❌ New passwords do not match!");
+      toast("New passwords do not match!", "error");
       return;
     }
     if (passwordData.newPassword.length < 6) {
-      alert("❌ New password must be at least 6 characters long.");
+      toast("New password must be at least 6 characters long.", "error");
       return;
     }
 
@@ -100,14 +102,14 @@ function Settings({ userProfile, setUserProfile }) {
       
       const data = await res.json();
       if (res.ok) {
-        alert("✅ " + data.message);
+        toast(data.message);
         setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        alert("❌ " + (data.message || "Failed to change password."));
+        toast(data.message || "Failed to change password.", "error");
       }
     } catch (err) {
       console.error(err);
-      alert("❌ Server is unreachable. Please verify your connection.");
+      toast("Server is unreachable. Please verify your connection.", "error");
     } finally {
       setPasswordLoading(false);
     }
@@ -126,13 +128,40 @@ function Settings({ userProfile, setUserProfile }) {
       const updatedUser = { ...savedUser, ...formData };
       localStorage.setItem("registeredUser", JSON.stringify(updatedUser));
     }
-    alert("✅ Personal Info saved! It will update globally immediately.");
+    toast("Personal Info saved!");
   };
 
-  // Generic handler for mocked forms
-  const handleGenericSave = (e) => {
+  const [supportMessage, setSupportMessage] = useState("");
+  const [supportLoading, setSupportLoading] = useState(false);
+
+  const handleSubmitTicket = async (e) => {
     e.preventDefault();
-    alert("✅ Changes saved successfully!");
+    if (!supportMessage.trim()) return;
+
+    setSupportLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name || "Unknown User",
+          email: formData.email || "unknown@example.com",
+          message: supportMessage
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast(data.message);
+        setSupportMessage("");
+      } else {
+        toast(data.message || "Failed to submit ticket.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      toast("Server is unreachable. Please verify your connection.", "error");
+    } finally {
+      setSupportLoading(false);
+    }
   };
 
   return (
@@ -264,12 +293,20 @@ function Settings({ userProfile, setUserProfile }) {
                   <span>We reply within 2 hours</span>
                 </div>
               </div>
-              <form onSubmit={handleGenericSave} className="ticket-form">
+              <form onSubmit={handleSubmitTicket} className="ticket-form">
                 <div className="form-group">
                   <label>Create a Support Ticket</label>
-                  <textarea rows="4" placeholder="Describe your issue here..." required></textarea>
+                  <textarea 
+                    rows="4" 
+                    placeholder="Describe your issue here..." 
+                    required
+                    value={supportMessage}
+                    onChange={(e) => setSupportMessage(e.target.value)}
+                  ></textarea>
                 </div>
-                <button type="submit" className="save-btn">Submit Ticket</button>
+                <button type="submit" className="save-btn" disabled={supportLoading}>
+                  {supportLoading ? "Submitting..." : "Submit Ticket"}
+                </button>
               </form>
             </div>
           )}

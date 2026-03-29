@@ -18,6 +18,9 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/medicines', require('./routes/medicines'));
 app.use('/api/orders', require('./routes/orders'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/support', require('./routes/support'));
+app.use('/api/prescriptions', require('./routes/prescriptions'));
 
 // Auto-Seed Helper
 const seedMedicines = async () => {
@@ -32,10 +35,11 @@ const seedMedicines = async () => {
   } catch(e) { console.error('Auto-seeding skipped/failed:', e.message); }
 };
 
+
 // Sync DB and Start Server
 sequelize.sync({ alter: true }).then(async () => {
   console.log('MySQL Database synchronized, forced wipe applied!');
-  await seedMedicines(); // Automatically force-feed defaults every boot
+  await seedMedicines();
   
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

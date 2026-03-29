@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const auth = require('../middleware/auth');
+const nodemailer = require('nodemailer');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'medease_secret_key_123';
 
@@ -126,6 +127,111 @@ router.put('/update-address', auth, async (req, res) => {
   } catch (err) {
     console.error("Update Address Error:", err);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// --- FORGOT PASSWORD FLOW ---
+
+// Create a test account for Nodemailer if credentials are not provided
+let transporter;
+nodemailer.createTestAccount((err, account) => {
+  if (err) {
+    console.error('Failed to create a testing account. ' + err.message);
+    return;
+  }
+  transporter = nodemailer.createTransport({
+    host: account.smtp.host,
+    port: account.smtp.port,
+    secure: account.smtp.secure,
+    auth: {
+      user: account.user,
+      pass: account.pass
+    }
+  });
+});
+
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: 'User with this email does not exist' });
+
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60000); // 10 minutes
+
+    user.resetPasswordOtp = otp;
+    user.resetPasswordExpires = expires;
+    await user.save();
+
+    // Send email
+    let testUrl = null;
+    if (transporter) {
+      const info = await transporter.sendMail({
+        from: '"MedEase" <noreply@medease.com>',
+        to: email,
+        subject: 'Your Password Reset OTP',
+        text: `Your OTP for password reset is ${otp}. It is valid for 10 minutes.`,
+        html: `<p>Your OTP for password reset is <b>${otp}</b>. It is valid for 10 minutes.</p>`
+      });
+      testUrl = nodemailer.getTestMessageUrl(info);
+      console.log('Password reset email sent: %s', testUrl);
+    }
+
+    res.json({ message: 'OTP sent to email successfully', url: testUrl });
+  } catch (err) {
+    console.error("Forgot Password Error:", err);
+    res.status(500).json({ message: 'Server error while processing forgot password' });
+  }
+});
+
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!user.resetPasswordOtp || user.resetPasswordOtp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    if (new Date() > new Date(user.resetPasswordExpires)) {
+      return res.status(400).json({ message: 'OTP has expired' });
+    }
+
+    res.json({ message: 'OTP verified successfully' });
+  } catch (err) {
+    console.error("Verify OTP Error:", err);
+    res.status(500).json({ message: 'Server error while verifying OTP' });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!user.resetPasswordOtp || user.resetPasswordOtp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    if (new Date() > new Date(user.resetPasswordExpires)) {
+      return res.status(400).json({ message: 'OTP has expired' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    user.resetPasswordOtp = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (err) {
+    console.error("Reset Password Error:", err);
+    res.status(500).json({ message: 'Server error while resetting password' });
   }
 });
 

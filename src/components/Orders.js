@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "./ToastProvider";
 import "./Orders.css";
 
 function Orders() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
+  const [confirmDialog, setConfirmDialog] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -63,23 +66,31 @@ function Orders() {
     const newCart = [...existingCart, ...items];
     localStorage.setItem("cart", JSON.stringify(newCart));
     window.dispatchEvent(new Event('cartUpdated'));
-    alert("Medicines successfully re-added to your cart!");
+    toast("Medicines re-added to your cart!");
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    // Show confirmation dialog before taking action
+  const showConfirm = (message) => new Promise(resolve => {
+    setConfirmDialog({
+      message,
+      onConfirm: () => { resolve(true); setConfirmDialog(null); },
+      onCancel: () => { resolve(false); setConfirmDialog(null); }
+    });
+  });
+
+  const updateOrderStatus = async (orderId, newStatus) => {
     if (newStatus === "Cancelled") {
-      if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
+      const ok = await showConfirm("Are you sure you want to cancel this order? This action cannot be undone.");
+      if (!ok) return;
     }
     if (newStatus === "Return Requested") {
-      if (!window.confirm("Do you want to initiate a return/refund request for this delivered order?")) return;
+      const ok = await showConfirm("Do you want to initiate a return/refund request for this delivered order?");
+      if (!ok) return;
     }
 
     const updatedOrders = orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
     setOrders(updatedOrders);
     localStorage.setItem("orders", JSON.stringify(updatedOrders));
-    
-    alert(`Order #${orderId} has been updated to: ${newStatus}`);
+    toast(`Order #${orderId} updated to: ${newStatus}`);
   };
 
   return (
@@ -148,6 +159,35 @@ function Orders() {
           </>
         )}
       </div>
+
+      {/* Custom Confirm Dialog */}
+      {confirmDialog && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99998
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '14px', padding: '32px 36px',
+            boxShadow: '0 12px 48px rgba(0,0,0,0.25)', maxWidth: '400px', width: '90%',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '36px', marginBottom: '12px' }}>⚠️</div>
+            <p style={{ fontSize: '15px', lineHeight: 1.6, marginBottom: '24px', color: '#444' }}>
+              {confirmDialog.message}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={confirmDialog.onCancel}
+                style={{ padding: '10px 26px', borderRadius: '8px', border: '1.5px solid #ccc', background: '#fff', color: '#555', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}
+              >Cancel</button>
+              <button
+                onClick={confirmDialog.onConfirm}
+                style={{ padding: '10px 26px', borderRadius: '8px', border: 'none', background: '#e74c3c', color: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}
+              >Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
