@@ -62,11 +62,11 @@ function Overview({ userProfile, setActiveTab, setUserProfile }) {
           </div>
         </div>
 
-        <div className="stat-card" onClick={() => setActiveTab("prescription")}>
-          <div className="stat-icon rx-icon">📝</div>
+        <div className="stat-card" onClick={() => setActiveTab("medicines")}>
+          <div className="stat-icon rx-icon">💊</div>
           <div className="stat-info">
-            <h3>Prescriptions</h3>
-            <p>1 Pending Renewal</p>
+            <h3>Medicines</h3>
+            <p>Browse & order meds</p>
           </div>
         </div>
 

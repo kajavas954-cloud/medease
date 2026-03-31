@@ -6,7 +6,7 @@ import Orders from "./Orders";
 import Payment from "./Payment";
 import Wishlist from "./Wishlist";
 import Adviser from "./Adviser";
-import Prescription from "./Prescription";
+
 import Settings from "./Settings";
 import Overview from "./Overview";
 import Footer from "./Footer";
@@ -87,7 +87,7 @@ function Dashboard() {
             <div className="brand-popup">
               <div className="brand-popup-item">
                 <span className="bp-icon">📧</span>
-                <span className="bp-text">support@medease.com</span>
+                <span className="bp-text">medease.apk@gmail.com</span>
               </div>
               <div className="brand-popup-item">
                 <span className="bp-icon">📞</span>
@@ -116,12 +116,7 @@ function Dashboard() {
             🧪 Medicines
           </button>
 
-          <button
-            className={activeTab === "prescription" ? "active" : ""}
-            onClick={() => setActiveTab("prescription")}
-          >
-            📝 Prescriptions
-          </button>
+
 
           <button
             className={`cart-btn-wrap ${activeTab === "cart" ? "active" : ""}`}
@@ -236,7 +231,7 @@ function Dashboard() {
             setActiveTab={setActiveTab}
           />
         )}
-        {activeTab === "prescription" && <Prescription />}
+
         {activeTab === "cart" && <Cart setActiveTab={setActiveTab} />}
         {activeTab === "orders" && <Orders setActiveTab={setActiveTab} />}
         {activeTab === "payment" && <Payment setActiveTab={setActiveTab} />}

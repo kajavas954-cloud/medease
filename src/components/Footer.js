@@ -61,7 +61,7 @@ const Footer = () => {
         <div className="footer-section contact-section">
           <h3>Contact Us</h3>
           <ul className="contact-list">
-             <li><span className="contact-icon">✉️</span> support@medease.com</li>
+             <li><span className="contact-icon">✉️</span>medease.apk@gmail.com</li>
              <li><span className="contact-icon">📞</span> +1 800 123 4567</li>
              <li><span className="contact-icon">📍</span> 123 Health Ave, Wellness City</li>
           </ul>

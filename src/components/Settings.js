@@ -28,9 +28,7 @@ function Settings({ userProfile, setUserProfile }) {
   });
   const [addressLoading, setAddressLoading] = useState(false);
 
-  const handleAddressChange = (e) => {
-    setAddressData({ ...addressData, [e.target.name]: e.target.value });
-  };
+  // handleAddressChange is defined later with validation
 
   const handleSaveAddress = async (e) => {
     e.preventDefault();
@@ -69,6 +67,11 @@ function Settings({ userProfile, setUserProfile }) {
     confirmPassword: ""
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Show/hide toggles for each password field
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handlePasswordChange = (e) => {
     setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
@@ -115,8 +118,33 @@ function Settings({ userProfile, setUserProfile }) {
     }
   };
 
+  // ── Personal Info handlers ──────────────────────────────────────
+  // Full Name: letters + spaces only
+  const handleNameChange = (e) => {
+    const val = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+    setFormData({ ...formData, name: val });
+  };
+
+  // Phone: digits only
+  const handlePhoneChange = (e) => {
+    const val = e.target.value.replace(/\D/g, "");
+    setFormData({ ...formData, phone: val });
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // ── Address handlers with validation ────────────────────────────
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    let filtered = value;
+    if (name === "city" || name === "state") {
+      filtered = value.replace(/[^a-zA-Z\s]/g, ""); // letters + spaces only
+    } else if (name === "postalCode") {
+      filtered = value.replace(/\D/g, ""); // digits only
+    }
+    setAddressData({ ...addressData, [name]: filtered });
   };
 
   const handleSavePersonal = (e) => {
@@ -184,7 +212,14 @@ function Settings({ userProfile, setUserProfile }) {
               <form onSubmit={handleSavePersonal}>
                 <div className="form-group">
                   <label>Full Name</label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleNameChange}
+                    placeholder="Alphabets only"
+                    required
+                  />
                 </div>
                 <div className="form-group">
                   <label>Email Address</label>
@@ -192,7 +227,14 @@ function Settings({ userProfile, setUserProfile }) {
                 </div>
                 <div className="form-group">
                   <label>Phone Number</label>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} />
+                  <input
+                    type="tel"
+                    name="phone"
+                    inputMode="numeric"
+                    value={formData.phone}
+                    onChange={handlePhoneChange}
+                    placeholder="Digits only"
+                  />
                 </div>
                 <div className="form-group">
                   <label>Age</label>
@@ -237,15 +279,37 @@ function Settings({ userProfile, setUserProfile }) {
                 </div>
                 <div className="form-group">
                   <label>City</label>
-                  <input type="text" name="city" value={addressData.city} onChange={handleAddressChange} required />
+                  <input
+                    type="text"
+                    name="city"
+                    value={addressData.city}
+                    onChange={handleAddressChange}
+                    placeholder="Alphabets only"
+                    required
+                  />
                 </div>
                 <div className="form-group">
                   <label>State / Province</label>
-                  <input type="text" name="state" value={addressData.state} onChange={handleAddressChange} required />
+                  <input
+                    type="text"
+                    name="state"
+                    value={addressData.state}
+                    onChange={handleAddressChange}
+                    placeholder="Alphabets only"
+                    required
+                  />
                 </div>
                 <div className="form-group">
                   <label>Postal Code</label>
-                  <input type="text" name="postalCode" value={addressData.postalCode} onChange={handleAddressChange} required />
+                  <input
+                    type="text"
+                    name="postalCode"
+                    inputMode="numeric"
+                    value={addressData.postalCode}
+                    onChange={handleAddressChange}
+                    placeholder="Digits only"
+                    required
+                  />
                 </div>
                 <button type="submit" className="save-btn" disabled={addressLoading}>
                   {addressLoading ? "Updating..." : "Update Address"}
@@ -260,15 +324,77 @@ function Settings({ userProfile, setUserProfile }) {
               <form onSubmit={handleChangePassword}>
                 <div className="form-group">
                   <label>Current Password</label>
-                  <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} required />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showCurrent ? "text" : "password"}
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      style={{ paddingRight: '40px' }}
+                      required
+                    />
+                    <span
+                      onClick={() => setShowCurrent(v => !v)}
+                      style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.7, display: 'flex', alignItems: 'center' }}
+                      title={showCurrent ? "Hide password" : "Show password"}
+                    >
+                      {showCurrent ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      )}
+                    </span>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>New Password</label>
-                  <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} required minLength="6" />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showNew ? "text" : "password"}
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      style={{ paddingRight: '40px' }}
+                      required
+                      minLength="6"
+                    />
+                    <span
+                      onClick={() => setShowNew(v => !v)}
+                      style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.7, display: 'flex', alignItems: 'center' }}
+                      title={showNew ? "Hide password" : "Show password"}
+                    >
+                      {showNew ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      )}
+                    </span>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>Confirm New Password</label>
-                  <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} required minLength="6" />
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showConfirm ? "text" : "password"}
+                      name="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      style={{ paddingRight: '40px' }}
+                      required
+                      minLength="6"
+                    />
+                    <span
+                      onClick={() => setShowConfirm(v => !v)}
+                      style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', opacity: 0.7, display: 'flex', alignItems: 'center' }}
+                      title={showConfirm ? "Hide password" : "Show password"}
+                    >
+                      {showConfirm ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      )}
+                    </span>
+                  </div>
                 </div>
                 <button type="submit" className="save-btn" disabled={passwordLoading}>
                   {passwordLoading ? "Updating..." : "Update Password"}
@@ -280,7 +406,7 @@ function Settings({ userProfile, setUserProfile }) {
           {activeTab === "support" && (
             <div className="settings-section support-section">
               <h3>Help & Support</h3>
-              <p>Experiencing issues or need help with a prescription or order?</p>
+              <p>Experiencing issues or need help with an order?</p>
               <div className="support-cards">
                 <div className="support-card">
                   <h4>📞 Call Us</h4>
@@ -289,7 +415,7 @@ function Settings({ userProfile, setUserProfile }) {
                 </div>
                 <div className="support-card">
                   <h4>📧 Email Support</h4>
-                  <p>support@medease.com</p>
+                  <p>medease.apk@gmail.com</p>
                   <span>We reply within 2 hours</span>
                 </div>
               </div>

@@ -79,7 +79,7 @@ router.get('/medicines', adminAuth, async (req, res) => {
 
 router.post('/medicines', adminAuth, async (req, res) => {
   try {
-    const { name, category, price, description, imageUrl, stockQuantity, requiresPrescription, uses, warning, limit, expiry, beforeUse } = req.body;
+    const { name, category, price, description, imageUrl, stockQuantity, uses, warning, limit, expiry, beforeUse } = req.body;
     const medicine = await Medicine.create({ 
       name, 
       category, 
@@ -91,8 +91,7 @@ router.post('/medicines', adminAuth, async (req, res) => {
       limit,
       expiry,
       beforeUse,
-      stockQuantity: stockQuantity || 100, // Default stock if not provided
-      requiresPrescription: requiresPrescription || false
+      stockQuantity: stockQuantity || 100 // Default stock if not provided
     });
     res.status(201).json(medicine);
   } catch (err) {
@@ -107,7 +106,7 @@ router.put('/medicines/:id', adminAuth, async (req, res) => {
     if (!medicine) return res.status(404).json({ message: 'Medicine not found' });
     
     // Update fields
-    const { name, category, price, description, imageUrl, stockQuantity, requiresPrescription, uses, warning, limit, expiry, beforeUse } = req.body;
+    const { name, category, price, description, imageUrl, stockQuantity, uses, warning, limit, expiry, beforeUse } = req.body;
     if (name) medicine.name = name;
     if (category) medicine.category = category;
     if (price !== undefined) medicine.price = price;
@@ -119,7 +118,6 @@ router.put('/medicines/:id', adminAuth, async (req, res) => {
     if (expiry !== undefined) medicine.expiry = expiry;
     if (beforeUse !== undefined) medicine.beforeUse = beforeUse;
     if (stockQuantity !== undefined) medicine.stockQuantity = stockQuantity;
-    if (requiresPrescription !== undefined) medicine.requiresPrescription = requiresPrescription;
 
     await medicine.save();
     res.json(medicine);

@@ -20,7 +20,6 @@ app.use('/api/medicines', require('./routes/medicines'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/support', require('./routes/support'));
-app.use('/api/prescriptions', require('./routes/prescriptions'));
 
 // Auto-Seed Helper
 const seedMedicines = async () => {

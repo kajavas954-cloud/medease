@@ -102,11 +102,6 @@ function Cart({ setActiveTab }) {
                   <div className="cart-item-info">
                     <h4>{item.name}</h4>
                     <span className="cart-item-cat">{item.category}</span>
-                    {item.prescriptionUrl && (
-                      <div style={{ marginTop: '8px', fontSize: '11px', color: '#27ae60', background: '#eafaf1', padding: '4px 8px', borderRadius: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px', border: '1px solid #c8e6c9' }}>
-                        <span style={{ fontSize: '14px' }}>✓</span> Rx Attached
-                      </div>
-                    )}
                   </div>
                   <div className="cart-item-pricing" style={{alignItems: 'flex-end', gap: '8px', minWidth: '120px'}}>
                     <p className="cart-item-price" style={{marginBottom: '5px'}}>₹ {(item.price * (item.quantity || 1)).toFixed(2)}</p>
@@ -121,8 +116,8 @@ function Cart({ setActiveTab }) {
               ))}
             </div>
             
-            <button className="clear-cart-link" onClick={clearCart}>
-              ⚠️ Clear Entire Cart
+            <button className="clear-cart-btn" onClick={clearCart}>
+              🗑️ Clear Entire Cart
             </button>
           </div>
 

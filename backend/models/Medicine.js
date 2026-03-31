@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
     expiry: { type: DataTypes.STRING },
     beforeUse: { type: DataTypes.STRING },
     imageUrl: { type: DataTypes.STRING },
-    requiresPrescription: { type: DataTypes.BOOLEAN, defaultValue: false },
     stockQuantity: { type: DataTypes.INTEGER, defaultValue: 0 }
   });
   return Medicine;

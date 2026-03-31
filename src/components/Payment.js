@@ -7,9 +7,16 @@ function Payment({ setActiveTab }) {
   const navigate = useNavigate();
   const toast = useToast();
   const [method, setMethod] = useState("card");
-  const [address, setAddress] = useState("");
   const [slot, setSlot] = useState("Today, 2:00 PM - 6:00 PM");
   const [cartTotal, setCartTotal] = useState(0);
+
+  // Structured address (same fields as Settings > Manage Address)
+  const [addressData, setAddressData] = useState({
+    streetAddress: "",
+    city: "",
+    state: "",
+    postalCode: ""
+  });
 
   const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "", name: "" });
   const [upiId, setUpiId] = useState("");
@@ -20,12 +27,52 @@ function Payment({ setActiveTab }) {
     const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
     setCartTotal(total);
 
+    // Pre-fill address from saved user profile (same source as Settings)
     const user = JSON.parse(localStorage.getItem("registeredUser")) || {};
-    if (user.streetAddress) {
-      setAddress(`${user.streetAddress}, ${user.city}, ${user.state} ${user.postalCode}`);
-    }
+    setAddressData({
+      streetAddress: user.streetAddress || "",
+      city: user.city || "",
+      state: user.state || "",
+      postalCode: user.postalCode || ""
+    });
   }, []);
 
+  // ── Address handlers ──────────────────────────────────────────────
+  const handleAddressChange = (e) => {
+    setAddressData({ ...addressData, [e.target.name]: e.target.value });
+  };
+
+  // ── Card input handlers ───────────────────────────────────────────
+
+  // Card Number: digits only, max 16
+  const handleCardNumber = (e) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 16);
+    setCardDetails({ ...cardDetails, number: val });
+  };
+
+  // MM/YY: digits only, auto-insert "/" after 2 digits
+  const handleExpiry = (e) => {
+    let val = e.target.value.replace(/\D/g, ""); // strip non-digits
+    if (val.length > 4) val = val.slice(0, 4);
+    if (val.length >= 3) {
+      val = val.slice(0, 2) + "/" + val.slice(2);
+    }
+    setCardDetails({ ...cardDetails, expiry: val });
+  };
+
+  // CVV: digits only, max 3
+  const handleCvv = (e) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 3);
+    setCardDetails({ ...cardDetails, cvv: val });
+  };
+
+  // Card Holder Name: alphabets + spaces only
+  const handleCardName = (e) => {
+    const val = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+    setCardDetails({ ...cardDetails, name: val });
+  };
+
+  // ── Payment submit ────────────────────────────────────────────────
   const handlePayment = async () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     if (cart.length === 0) {
@@ -33,27 +80,46 @@ function Payment({ setActiveTab }) {
       return;
     }
 
-    if (!address || !address.trim()) {
-      toast("Delivery Address is required. Please fill it in.", "error");
-      return;
+    // Validate address fields
+    if (!addressData.streetAddress.trim()) {
+      toast("Street Address is required.", "error"); return;
+    }
+    if (!addressData.city.trim()) {
+      toast("City is required.", "error"); return;
+    }
+    if (!addressData.state.trim()) {
+      toast("State / Province is required.", "error"); return;
+    }
+    if (!addressData.postalCode.trim()) {
+      toast("Postal Code is required.", "error"); return;
     }
 
+    // Validate card
     if (method === "card") {
-      if (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name) {
-        toast("Please fill out all Card Details (Number, Expiry, CVV, and Name).", "error");
-        return;
+      if (!cardDetails.number || cardDetails.number.length < 16) {
+        toast("Please enter a valid 16-digit Card Number.", "error"); return;
+      }
+      if (!cardDetails.expiry || cardDetails.expiry.length < 5) {
+        toast("Please enter a valid Expiry Date (MM/YY).", "error"); return;
+      }
+      if (!cardDetails.cvv || cardDetails.cvv.length < 3) {
+        toast("Please enter a valid 3-digit CVV.", "error"); return;
+      }
+      if (!cardDetails.name.trim()) {
+        toast("Card Holder Name is required.", "error"); return;
       }
     } else if (method === "upi") {
-      if (!upiId || !upiId.trim()) {
-        toast("Please enter a valid UPI ID.", "error");
-        return;
+      if (!upiId.trim()) {
+        toast("Please enter a valid UPI ID.", "error"); return;
       }
     } else if (method === "netbanking") {
-      if (!bank || bank === "") {
-        toast("Please select a Bank from the dropdown.", "error");
-        return;
+      if (!bank) {
+        toast("Please select a Bank from the dropdown.", "error"); return;
       }
     }
+
+    // Build combined address string for backend
+    const address = `${addressData.streetAddress}, ${addressData.city}, ${addressData.state} ${addressData.postalCode}`.trim();
 
     const token = localStorage.getItem("authToken");
 
@@ -62,14 +128,12 @@ function Payment({ setActiveTab }) {
         const orderData = {
           items: cart.map(c => {
             if (!c.id) {
-              console.error("Missing ID for item:", c.name);
               throw new Error(`Technical error: Missing product ID for ${c.name}. Please re-add to cart.`);
             }
-            return { 
-              medicineId: c.id, 
-              quantity: c.quantity || 1, 
-              priceAtTime: c.price, 
-              prescriptionUrl: c.prescriptionUrl || null 
+            return {
+              medicineId: c.id,
+              quantity: c.quantity || 1,
+              priceAtTime: c.price
             };
           }),
           address,
@@ -79,15 +143,15 @@ function Payment({ setActiveTab }) {
 
         const res = await fetch("http://localhost:5000/api/orders", {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "x-auth-token": token
           },
           body: JSON.stringify(orderData)
         });
-        
+
         const data = await res.json();
-        
+
         if (res.ok) {
           localStorage.removeItem("cart");
           toast("Payment Successful! Your order has been placed.");
@@ -96,7 +160,7 @@ function Payment({ setActiveTab }) {
           return;
         } else {
           toast(data.message || "Failed to place order. Please try again.", "error");
-          return; // Stop execution if backend returns error (like insufficient stock)
+          return;
         }
       } catch (err) {
         console.error("Order processing error:", err);
@@ -105,7 +169,7 @@ function Payment({ setActiveTab }) {
       }
     }
 
-    // Fallback if backend is not running or no token
+    // Fallback (no token / backend offline)
     const orderId = "ME" + Math.floor(100000 + Math.random() * 900000);
     const orderDate = new Date().toLocaleString();
 
@@ -122,7 +186,6 @@ function Payment({ setActiveTab }) {
 
     const orders = JSON.parse(localStorage.getItem("orders")) || [];
     orders.push(newOrder);
-
     localStorage.setItem("orders", JSON.stringify(orders));
     localStorage.removeItem("cart");
 
@@ -141,18 +204,65 @@ function Payment({ setActiveTab }) {
 
         <div className="payment-grid">
           <div className="checkout-left">
+
+            {/* ── Step 1: Delivery Address ── */}
             <div className="checkout-step">
               <h3 className="method-title">1. Delivery Address</h3>
-              <textarea 
-                className="checkout-textarea"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Enter your full delivery address..."
-                rows="3"
-                required
-              />
+              <div className="address-form">
+                <div className="form-field">
+                  <label className="field-label">Street Address</label>
+                  <input
+                    type="text"
+                    name="streetAddress"
+                    className="address-input"
+                    placeholder="e.g. 123 Main Street, Apt 4B"
+                    value={addressData.streetAddress}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                </div>
+                <div className="address-row">
+                  <div className="form-field">
+                    <label className="field-label">City</label>
+                    <input
+                      type="text"
+                      name="city"
+                      className="address-input"
+                      placeholder="e.g. Mumbai"
+                      value={addressData.city}
+                      onChange={handleAddressChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-field">
+                    <label className="field-label">State / Province</label>
+                    <input
+                      type="text"
+                      name="state"
+                      className="address-input"
+                      placeholder="e.g. Maharashtra"
+                      value={addressData.state}
+                      onChange={handleAddressChange}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-field postal-field">
+                  <label className="field-label">Postal Code</label>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    className="address-input"
+                    placeholder="e.g. 400001"
+                    value={addressData.postalCode}
+                    onChange={handleAddressChange}
+                    required
+                  />
+                </div>
+              </div>
             </div>
 
+            {/* ── Step 2: Delivery Slot ── */}
             <div className="checkout-step">
               <h3 className="method-title">2. Choose Delivery Slot</h3>
               <div className="payment-options">
@@ -171,39 +281,92 @@ function Payment({ setActiveTab }) {
               </div>
             </div>
 
+            {/* ── Step 3: Payment Method ── */}
             <div className="checkout-step">
               <h3 className="method-title">3. Select Payment Method</h3>
               <div className="payment-options">
                 <label className={`payment-option ${method === "card" ? "active" : ""}`}>
                   <input type="radio" checked={method === "card"} onChange={() => setMethod("card")} />
-                  <span>Debit / Credit Card</span>
+                  <span>💳 Debit / Credit Card</span>
                 </label>
                 <label className={`payment-option ${method === "upi" ? "active" : ""}`}>
                   <input type="radio" checked={method === "upi"} onChange={() => setMethod("upi")} />
-                  <span>UPI</span>
+                  <span>📱 UPI</span>
                 </label>
                 <label className={`payment-option ${method === "netbanking" ? "active" : ""}`}>
                   <input type="radio" checked={method === "netbanking"} onChange={() => setMethod("netbanking")} />
-                  <span>Net Banking</span>
+                  <span>🏦 Net Banking</span>
                 </label>
               </div>
 
               <div className="payment-forms-area">
                 {method === "card" && (
                   <div className="payment-form">
-                    <input type="text" placeholder="Card Number" maxLength="16" value={cardDetails.number} onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })} />
-                    <div className="row">
-                      <input type="text" placeholder="MM / YY" maxLength="5" value={cardDetails.expiry} onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })} />
-                      <input type="password" placeholder="CVV" maxLength="3" value={cardDetails.cvv} onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })} />
+                    {/* Card Number — digits only */}
+                    <div className="card-field-wrap">
+                      <label className="field-label">Card Number</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="1234 5678 9012 3456"
+                        maxLength="16"
+                        value={cardDetails.number}
+                        onChange={handleCardNumber}
+                      />
                     </div>
-                    <input type="text" placeholder="Card Holder Name" value={cardDetails.name} onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })} />
+
+                    <div className="row">
+                      {/* MM/YY — auto-slash */}
+                      <div className="card-field-wrap" style={{ flex: 1 }}>
+                        <label className="field-label">Expiry Date</label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="MM / YY"
+                          maxLength="5"
+                          value={cardDetails.expiry}
+                          onChange={handleExpiry}
+                        />
+                      </div>
+
+                      {/* CVV — digits only */}
+                      <div className="card-field-wrap" style={{ flex: 1 }}>
+                        <label className="field-label">CVV</label>
+                        <input
+                          type="password"
+                          inputMode="numeric"
+                          placeholder="•••"
+                          maxLength="3"
+                          value={cardDetails.cvv}
+                          onChange={handleCvv}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Card Holder Name — alphabets only */}
+                    <div className="card-field-wrap">
+                      <label className="field-label">Card Holder Name</label>
+                      <input
+                        type="text"
+                        placeholder="Name as on card"
+                        value={cardDetails.name}
+                        onChange={handleCardName}
+                      />
+                    </div>
                   </div>
                 )}
+
                 {method === "upi" && (
                   <div className="payment-form">
-                    <input type="text" placeholder="Enter UPI ID (e.g. name@bank)" value={upiId} onChange={(e) => setUpiId(e.target.value)} />
+                    <input
+                      type="text"
+                      placeholder="Enter UPI ID (e.g. name@bank)"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                    />
                   </div>
                 )}
+
                 {method === "netbanking" && (
                   <div className="payment-form">
                     <select value={bank} onChange={(e) => setBank(e.target.value)}>
@@ -219,14 +382,15 @@ function Payment({ setActiveTab }) {
             </div>
           </div>
 
+          {/* ── Right: Summary ── */}
           <div className="checkout-right">
             <div className="payment-amount-display">
               <span>Total Amount:</span>
               <strong>₹ {cartTotal.toFixed(2)}</strong>
             </div>
-            
+
             <button className="pay-btn" onClick={handlePayment}>
-              Confirm & Place Order
+              Confirm &amp; Place Order
             </button>
 
             <button className="back-home-btn auto-mt" onClick={() => navigate("/cart")}>

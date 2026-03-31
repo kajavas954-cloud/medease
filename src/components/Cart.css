@@ -132,21 +132,32 @@
   font-weight: 600;
 }
 
-.clear-cart-link {
+.clear-cart-btn {
   align-self: flex-start;
-  margin-top: 20px;
-  background: none;
-  border: none;
+  margin-top: 18px;
+  background: transparent;
+  border: 2px solid #e74c3c;
   color: #e74c3c;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  padding: 0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+  letter-spacing: 0.3px;
 }
 
-.clear-cart-link:hover {
-  text-decoration: underline;
-  color: #c0392b;
+.clear-cart-btn:hover {
+  background: #e74c3c;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.clear-cart-btn:active {
+  transform: translateY(0);
 }
 
 /* RIGHT: SUMMARY CARD */
