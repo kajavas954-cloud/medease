@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useToast } from "./ToastProvider";
 import "./Medicines.css";
 
 const categoryImages = {
@@ -18,6 +19,7 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
   const [loading, setLoading] = useState(true);
   const [localSearch, setLocalSearch] = useState("");
   const search = searchQuery !== undefined ? searchQuery : localSearch;
+  const toast = useToast();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/medicines")
@@ -94,9 +96,18 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
     const existingItemIndex = existingCart.findIndex(item => item.name === product.name);
     
     if (existingItemIndex !== -1) {
-      existingCart[existingItemIndex].quantity = (existingCart[existingItemIndex].quantity || 1) + 1;
+      const currentQty = existingCart[existingItemIndex].quantity || 1;
+      if (currentQty + 1 > product.stockQuantity) {
+        toast(`Only ${product.stockQuantity} items available in stock!`, "error");
+        return;
+      }
+      existingCart[existingItemIndex].quantity = currentQty + 1;
       if (prescriptionUrl) existingCart[existingItemIndex].prescriptionUrl = prescriptionUrl;
     } else {
+      if (product.stockQuantity <= 0) {
+        toast(`Sorry, ${product.name} is out of stock!`, "error");
+        return;
+      }
       existingCart.push({
         ...product,
         quantity: 1,

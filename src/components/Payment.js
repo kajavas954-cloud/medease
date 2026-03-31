@@ -59,31 +59,49 @@ function Payment({ setActiveTab }) {
 
     if (token) {
       try {
+        const orderData = {
+          items: cart.map(c => {
+            if (!c.id) {
+              console.error("Missing ID for item:", c.name);
+              throw new Error(`Technical error: Missing product ID for ${c.name}. Please re-add to cart.`);
+            }
+            return { 
+              medicineId: c.id, 
+              quantity: c.quantity || 1, 
+              priceAtTime: c.price, 
+              prescriptionUrl: c.prescriptionUrl || null 
+            };
+          }),
+          address,
+          deliveryTimeSlot: slot,
+          totalAmount: cartTotal
+        };
+
         const res = await fetch("http://localhost:5000/api/orders", {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
             "x-auth-token": token
           },
-          body: JSON.stringify({
-            items: cart.map(c => ({ medicineId: c.id || 1, quantity: c.quantity || 1, priceAtTime: c.price, prescriptionUrl: c.prescriptionUrl || null })),
-            address,
-            deliveryTimeSlot: slot,
-            totalAmount: cartTotal
-          })
+          body: JSON.stringify(orderData)
         });
+        
+        const data = await res.json();
         
         if (res.ok) {
           localStorage.removeItem("cart");
-          toast("Payment Successful! Order placed.");
+          toast("Payment Successful! Your order has been placed.");
           if (setActiveTab) setActiveTab("orders");
           else navigate("/orders");
           return;
         } else {
-          console.error("Order failed on backend");
+          toast(data.message || "Failed to place order. Please try again.", "error");
+          return; // Stop execution if backend returns error (like insufficient stock)
         }
       } catch (err) {
-        console.error("Backend unreachable", err);
+        console.error("Order processing error:", err);
+        toast(err.message || "Connection error. Please try again later.", "error");
+        return;
       }
     }
 

@@ -45,12 +45,18 @@ function Cart({ setActiveTab }) {
     let updatedCart = [...cartItems];
     const itemIndex = updatedCart.findIndex(i => i.name === itemName);
     if (itemIndex !== -1) {
-      const currentQty = updatedCart[itemIndex].quantity || 1;
+      const item = updatedCart[itemIndex];
+      const currentQty = item.quantity || 1;
       const newQty = currentQty + amount;
       
       if (newQty <= 0) {
         updatedCart.splice(itemIndex, 1);
       } else {
+        // Only check stock if we're increasing quantity
+        if (amount > 0 && newQty > item.stockQuantity) {
+          toast(`Stock limit reached! Only ${item.stockQuantity} items available.`, "error");
+          return;
+        }
         updatedCart[itemIndex].quantity = newQty;
       }
       

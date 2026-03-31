@@ -1,8 +1,7 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import Home from "./components/Home";
 import Medicines from "./components/Medicines";
 import Cart from "./components/Cart";
 import Payment from "./components/Payment";
@@ -12,9 +11,18 @@ import Chatbot from "./components/Chatbot";
 import ForgotPassword from "./components/ForgotPassword";
 import AdminDashboard from "./components/AdminDashboard";
 
-function App() {
+function MainWrapper() {
+  const location = useLocation();
+  const publicPaths = ["/", "/login", "/register", "/forgot-password"];
+  const isPublicPath = publicPaths.includes(location.pathname);
+  
+  // Show chatbot only if user is logged in (has authToken) and not on a public path.
+  // This satisfies 'only after login' and ensures it's hidden on the login screen.
+  const hasToken = localStorage.getItem("authToken");
+  const showChatbot = !!hasToken && !isPublicPath && !location.pathname.startsWith("/admin");
+
   return (
-    <BrowserRouter>
+    <>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -27,7 +35,15 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
-      <Chatbot />
+      {showChatbot && <Chatbot />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <MainWrapper />
     </BrowserRouter>
   );
 }

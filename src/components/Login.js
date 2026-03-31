@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SplashLoader from "./SplashLoader";
 import { useToast } from "./ToastProvider";
 import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
   const toast = useToast();
-  const [showSplash, setShowSplash] = useState(false);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -53,8 +50,8 @@ function Login() {
       if (res.ok) {
         localStorage.setItem("authToken", data.token);
         localStorage.setItem("registeredUser", JSON.stringify(data.user));
-        setShowSplash(true);
-        setTimeout(() => navigate("/home"), 2200);
+        toast("Login Successful! Redirecting...");
+        setTimeout(() => navigate("/home"), 1000);
       } else {
         toast(data.message || "Invalid email or password. Please try again.", "error");
       }
@@ -67,7 +64,6 @@ function Login() {
 
   return (
     <div className="auth-background">
-      {showSplash && <SplashLoader />}
       <div className="glass-card">
         <div className="auth-brand">
           <div className="brand-logo-icon">
