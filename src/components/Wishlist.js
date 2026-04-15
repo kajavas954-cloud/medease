@@ -31,7 +31,7 @@ function Wishlist() {
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
     const itemToAdd = {
       ...product,
-      img: categoryImages[product.category] || categoryImages.Medicine
+      img: product.imageUrl || categoryImages[product.category] || categoryImages.Medicine
     };
     
     const updatedCart = [...existingCart, itemToAdd];
@@ -64,7 +64,7 @@ function Wishlist() {
               </button>
               
               <img
-                src={categoryImages[item.category] || categoryImages.Medicine}
+                src={item.imageUrl || categoryImages[item.category] || categoryImages.Medicine}
                 alt={item.name}
               />
               

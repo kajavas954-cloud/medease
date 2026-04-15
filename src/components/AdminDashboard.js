@@ -256,9 +256,21 @@ const AdminDashboard = () => {
                   <td>{new Date(o.createdAt).toLocaleDateString()}</td>
                   <td>
                     {isFinal ? (
-                      <span className="order-status-badge" style={{ background: orderStatusColor(o.status) }}>
-                        {o.status}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span className="order-status-badge" style={{ background: orderStatusColor(o.status) }}>
+                          {o.status}
+                        </span>
+                        {o.cancelReason && (
+                          <div style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', maxWidth: '150px' }}>
+                            Cancel Reason: {o.cancelReason}
+                          </div>
+                        )}
+                        {o.returnReason && (
+                          <div style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', maxWidth: '150px' }}>
+                            Return Reason: {o.returnReason}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <select
                         className="status-dropdown"

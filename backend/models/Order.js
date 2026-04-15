@@ -14,6 +14,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     deliveryTimeSlot: {
       type: DataTypes.STRING
+    },
+    cancelReason: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    returnReason: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   });
   return Order;
