@@ -20,6 +20,7 @@ app.use('/api/medicines', require('./routes/medicines'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/support', require('./routes/support'));
+app.use('/api/appointments', require('./routes/appointments'));
 
 // Auto-Seed Helper
 const seedMedicines = async () => {
@@ -36,7 +37,7 @@ const seedMedicines = async () => {
 
 
 // Sync DB and Start Server
-sequelize.sync({ alter: true }).then(async () => {
+sequelize.sync({ alter: { drop: false } }).then(async () => {
   console.log('MySQL Database synchronized, forced wipe applied!');
   await seedMedicines();
   

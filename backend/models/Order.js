@@ -22,6 +22,11 @@ module.exports = (sequelize, DataTypes) => {
     returnReason: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    paymentMethod: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: 'card'
     }
   });
   return Order;

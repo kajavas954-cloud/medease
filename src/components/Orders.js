@@ -8,6 +8,10 @@ function Orders() {
   const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [confirmDialog, setConfirmDialog] = useState(null);
+  const [feedbackModal, setFeedbackModal] = useState(null); // { orderId }
+  const [feedbackForm, setFeedbackForm] = useState({ rating: 0, comment: '' });
+  const [hoverStar, setHoverStar] = useState(0);
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -24,6 +28,7 @@ function Orders() {
               status: o.status,
               total: o.totalAmount,
               createdAt: o.createdAt,
+              feedback: o.Feedback || null,
               items: o.OrderItems.map(oi => ({
                 name: oi.Medicine?.name || "Unknown Item",
                 price: oi.priceAtTime
@@ -210,6 +215,32 @@ function Orders() {
           )}
         </div>
       </div>
+
+      {/* Feedback Section */}
+      {order.status === "Delivered" && (
+        order.feedback ? (
+          <div className="feedback-submitted-card">
+            <div className="feedback-submitted-stars">
+              {[1,2,3,4,5].map(s => (
+                <span key={s} className={s <= order.feedback.rating ? 'star filled' : 'star'}>★</span>
+              ))}
+            </div>
+            <p className="feedback-submitted-comment">{order.feedback.comment || <em>No comment added.</em>}</p>
+            <span className="feedback-submitted-label">✅ Feedback submitted</span>
+          </div>
+        ) : (
+          <button
+            className="feedback-btn"
+            onClick={() => {
+              setFeedbackForm({ rating: 0, comment: '' });
+              setHoverStar(0);
+              setFeedbackModal({ orderId: order.id });
+            }}
+          >
+            ⭐ Leave Feedback
+          </button>
+        )
+      )}
     </div>
   );
 
@@ -268,6 +299,114 @@ function Orders() {
           )}
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      {feedbackModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
+          backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 99999, padding: '20px'
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '24px', padding: '36px',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.2)', maxWidth: '460px', width: '100%',
+            position: 'relative', animation: 'modalFadeIn 0.3s ease'
+          }}>
+            <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>
+              Rate Your Order #{feedbackModal.orderId}
+            </h3>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>
+              How was your experience? Your feedback helps us improve.
+            </p>
+
+            {/* Star Picker */}
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '24px' }}>
+              {[1, 2, 3, 4, 5].map(star => (
+                <span
+                  key={star}
+                  className={`feedback-star${star <= (hoverStar || feedbackForm.rating) ? ' active' : ''}`}
+                  onMouseEnter={() => setHoverStar(star)}
+                  onMouseLeave={() => setHoverStar(0)}
+                  onClick={() => setFeedbackForm(f => ({ ...f, rating: star }))}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+
+            {feedbackForm.rating > 0 && (
+              <p style={{ textAlign: 'center', fontSize: '13px', color: '#94a3b8', marginTop: '-18px', marginBottom: '16px' }}>
+                {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][feedbackForm.rating]} — {feedbackForm.rating}/5
+              </p>
+            )}
+
+            {/* Comment */}
+            <textarea
+              placeholder="Share your experience (optional)..."
+              value={feedbackForm.comment}
+              onChange={e => setFeedbackForm(f => ({ ...f, comment: e.target.value }))}
+              style={{
+                width: '100%', padding: '14px', borderRadius: '12px',
+                border: '1.5px solid #e2e8f0', fontSize: '14px',
+                resize: 'none', height: '100px', outline: 'none',
+                boxSizing: 'border-box', marginBottom: '22px',
+                fontFamily: 'inherit', transition: 'border-color 0.2s'
+              }}
+              onFocus={e => e.target.style.borderColor = '#1abc9c'}
+              onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+            />
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setFeedbackModal(null)}
+                style={{
+                  flex: 1, padding: '13px', borderRadius: '12px',
+                  border: '1.5px solid #e2e8f0', background: '#fff',
+                  color: '#64748b', fontWeight: 600, cursor: 'pointer', fontSize: '14px'
+                }}
+              >Cancel</button>
+              <button
+                disabled={feedbackForm.rating === 0 || submittingFeedback}
+                onClick={async () => {
+                  if (feedbackForm.rating === 0) { toast('Please select a star rating', 'error'); return; }
+                  setSubmittingFeedback(true);
+                  const token = localStorage.getItem('authToken');
+                  try {
+                    const res = await fetch(`http://localhost:5000/api/orders/${feedbackModal.orderId}/feedback`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+                      body: JSON.stringify(feedbackForm)
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                      setOrders(prev => prev.map(o =>
+                        o.id === feedbackModal.orderId
+                          ? { ...o, feedback: { rating: feedbackForm.rating, comment: feedbackForm.comment } }
+                          : o
+                      ));
+                      toast('Thank you for your feedback! ⭐');
+                      setFeedbackModal(null);
+                    } else {
+                      toast(data.message || 'Failed to submit feedback', 'error');
+                    }
+                  } catch {
+                    toast('Network error. Please try again.', 'error');
+                  } finally {
+                    setSubmittingFeedback(false);
+                  }
+                }}
+                style={{
+                  flex: 1, padding: '13px', borderRadius: '12px', border: 'none',
+                  background: feedbackForm.rating === 0 ? '#bdc3c7' : 'linear-gradient(135deg, #1abc9c, #16a085)',
+                  color: '#fff', fontWeight: 700, cursor: feedbackForm.rating === 0 ? 'not-allowed' : 'pointer',
+                  fontSize: '14px', boxShadow: feedbackForm.rating > 0 ? '0 4px 14px rgba(26,188,156,0.35)' : 'none',
+                  transition: 'all 0.3s ease'
+                }}
+              >{submittingFeedback ? 'Submitting...' : 'Submit Feedback'}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Action Reason Modal (Unified for Cancel & Return) */}
       {showReasonModal && (

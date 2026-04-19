@@ -280,3 +280,134 @@
   font-weight: 600;
   color: #64748b;
 }
+
+/* ── Net Banking Form ── */
+.nb-form {
+  gap: 16px;
+}
+
+.nb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nb-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .nb-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.nb-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px 8px;
+  border: 1.5px solid #e1e8ed;
+  border-radius: 12px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+  font-family: inherit;
+}
+
+.nb-tile:hover {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26,188,156,0.12);
+}
+
+.nb-tile.selected {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  box-shadow: 0 4px 14px rgba(26,188,156,0.18);
+}
+
+.nb-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.nb-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.nb-tile.selected .nb-name { color: #0d9488; }
+
+.nb-check {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #1abc9c;
+}
+
+.nb-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.nb-actype-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nb-actype-btn {
+  padding: 7px 18px;
+  border: 1.5px solid #e1e8ed;
+  border-radius: 20px;
+  background: #f8f9fa;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+}
+
+.nb-actype-btn:hover {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  color: #0d9488;
+}
+
+.nb-actype-btn.selected {
+  border-color: #1abc9c;
+  background: #1abc9c;
+  color: #fff;
+}
+
+.nb-secure-note {
+  font-size: 11px;
+  color: #64748b;
+  background: #f0fdf9;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ToastProvider";
+import PaymentSuccessPopup from "./PaymentSuccessPopup";
 import "./Payment.css";
 
 function Payment({ setActiveTab }) {
@@ -9,6 +10,8 @@ function Payment({ setActiveTab }) {
   const [method, setMethod] = useState("card");
   const [slot, setSlot] = useState("Today, 2:00 PM - 6:00 PM");
   const [cartTotal, setCartTotal] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [paidAmount, setPaidAmount] = useState(0);
 
   // Structured address (same fields as Settings > Manage Address)
   const [addressData, setAddressData] = useState({
@@ -21,6 +24,12 @@ function Payment({ setActiveTab }) {
   const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "", name: "" });
   const [upiId, setUpiId] = useState("");
   const [bank, setBank] = useState("");
+
+  // Net Banking state
+  const [nbBank,    setNbBank]    = useState("");
+  const [nbAccNo,   setNbAccNo]   = useState("");
+  const [nbIfsc,    setNbIfsc]    = useState("");
+  const [nbAccType, setNbAccType] = useState("Savings");
 
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -113,13 +122,24 @@ function Payment({ setActiveTab }) {
         toast("Please enter a valid UPI ID.", "error"); return;
       }
     } else if (method === "netbanking") {
-      if (!bank) {
-        toast("Please select a Bank from the dropdown.", "error"); return;
+      if (!nbBank) {
+        toast("Please select a Bank.", "error"); return;
+      }
+      if (!nbAccNo || nbAccNo.length < 8) {
+        toast("Please enter a valid Account Number (min 8 digits).", "error"); return;
+      }
+      if (!nbIfsc || nbIfsc.length < 11) {
+        toast("Please enter a valid 11-character IFSC Code.", "error"); return;
       }
     }
 
-    // Build combined address string for backend
-    const address = `${addressData.streetAddress}, ${addressData.city}, ${addressData.state} ${addressData.postalCode}`.trim();
+    // Build structured address object
+    const addressPayload = JSON.stringify({
+      street: addressData.streetAddress,
+      city: addressData.city,
+      state: addressData.state,
+      postalCode: addressData.postalCode
+    });
 
     const token = localStorage.getItem("authToken");
 
@@ -136,9 +156,10 @@ function Payment({ setActiveTab }) {
               priceAtTime: c.price
             };
           }),
-          address,
+          address: addressPayload,
           deliveryTimeSlot: slot,
-          totalAmount: cartTotal
+          totalAmount: cartTotal,
+          paymentMethod: method
         };
 
         const res = await fetch("http://localhost:5000/api/orders", {
@@ -154,9 +175,8 @@ function Payment({ setActiveTab }) {
 
         if (res.ok) {
           localStorage.removeItem("cart");
-          toast("Payment Successful! Your order has been placed.");
-          if (setActiveTab) setActiveTab("orders");
-          else navigate("/orders");
+          setPaidAmount(cartTotal);
+          setShowSuccess(true);
           return;
         } else {
           toast(data.message || "Failed to place order. Please try again.", "error");
@@ -190,12 +210,24 @@ function Payment({ setActiveTab }) {
     localStorage.removeItem("cart");
 
     toast("Payment Successful!");
-    if (setActiveTab) setActiveTab("orders");
-    else navigate("/orders");
+    setPaidAmount(cartTotal);
+    setShowSuccess(true);
   };
 
   return (
-    <div className="payment-container">
+    <>
+      {showSuccess && (
+        <PaymentSuccessPopup
+          amount={paidAmount}
+          subtitle="Your order has been placed successfully."
+          onClose={() => {
+            setShowSuccess(false);
+            if (setActiveTab) setActiveTab("orders");
+            else navigate("/orders");
+          }}
+        />
+      )}
+      <div className="payment-container">
       <div className="payment-card">
         <div className="payment-header-block">
           <h2>Secure Checkout</h2>
@@ -367,17 +399,87 @@ function Payment({ setActiveTab }) {
                   </div>
                 )}
 
-                {method === "netbanking" && (
-                  <div className="payment-form">
-                    <select value={bank} onChange={(e) => setBank(e.target.value)}>
-                      <option value="" disabled>Select your Bank</option>
-                      <option value="sbi">SBI</option>
-                      <option value="hdfc">HDFC</option>
-                      <option value="icici">ICICI</option>
-                      <option value="axis">Axis Bank</option>
-                    </select>
-                  </div>
-                )}
+                {method === "netbanking" && (() => {
+                  const NETBANKS = [
+                    { id: "sbi",    name: "SBI",      abbr: "SBI",   color: "#1a237e" },
+                    { id: "hdfc",   name: "HDFC",     abbr: "HDFC",  color: "#004c8c" },
+                    { id: "icici",  name: "ICICI",    abbr: "ICICI", color: "#f57c00" },
+                    { id: "axis",   name: "Axis",     abbr: "AXIS",  color: "#8d1b3d" },
+                    { id: "kotak",  name: "Kotak",    abbr: "KMB",   color: "#e50027" },
+                    { id: "pnb",    name: "PNB",      abbr: "PNB",   color: "#155724" },
+                    { id: "bob",    name: "BoB",      abbr: "BOB",   color: "#d97706" },
+                    { id: "canara", name: "Canara",   abbr: "CAN",   color: "#1565c0" },
+                    { id: "yes",    name: "Yes Bank", abbr: "YES",   color: "#0288d1" },
+                    { id: "iob",    name: "IOB",      abbr: "IOB",   color: "#558b2f" },
+                  ];
+                  return (
+                    <div className="payment-form nb-form">
+                      {/* Bank tiles */}
+                      <div className="nb-field">
+                        <label className="field-label">Select Your Bank</label>
+                        <div className="nb-grid">
+                          {NETBANKS.map(b => (
+                            <button
+                              key={b.id}
+                              type="button"
+                              className={`nb-tile${nbBank === b.id ? " selected" : ""}`}
+                              onClick={() => setNbBank(b.id)}
+                            >
+                              <div className="nb-logo" style={{ background: b.color }}>{b.abbr}</div>
+                              <span className="nb-name">{b.name}</span>
+                              {nbBank === b.id && <span className="nb-check">✓</span>}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Account Number */}
+                      <div className="nb-field">
+                        <label className="field-label">Account Number</label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="Enter your bank account number"
+                          value={nbAccNo}
+                          maxLength={18}
+                          onChange={e => setNbAccNo(e.target.value.replace(/\D/g, ""))}
+                        />
+                      </div>
+
+                      {/* IFSC Code */}
+                      <div className="nb-field">
+                        <label className="field-label">IFSC Code</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. SBIN0001234"
+                          value={nbIfsc}
+                          maxLength={11}
+                          onChange={e => setNbIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                        />
+                        <span className="nb-hint">11-character code printed on your cheque book</span>
+                      </div>
+
+                      {/* Account Type */}
+                      <div className="nb-field">
+                        <label className="field-label">Account Type</label>
+                        <div className="nb-actype-row">
+                          {["Savings", "Current", "Salary"].map(type => (
+                            <button
+                              key={type}
+                              type="button"
+                              className={`nb-actype-btn${nbAccType === type ? " selected" : ""}`}
+                              onClick={() => setNbAccType(type)}
+                            >{type}</button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="nb-secure-note">
+                        🔒 Your credentials are verified directly with your bank via an encrypted channel. We do not store any banking details.
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -399,7 +501,8 @@ function Payment({ setActiveTab }) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

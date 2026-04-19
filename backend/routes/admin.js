@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { Medicine, Order, OrderItem, User, SupportTicket } = require('../models');
+const { Medicine, Order, OrderItem, User, SupportTicket, Feedback, Appointment } = require('../models');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'medease_secret_key_123';
 const ADMIN_USERNAME = 'admin';
@@ -214,4 +214,54 @@ router.delete('/tickets/:id', adminAuth, async (req, res) => {
   }
 });
 
+// ----------------------------------------
+// Feedback Reviews Management
+// ----------------------------------------
+router.get('/feedback', adminAuth, async (req, res) => {
+  try {
+    const feedbacks = await Feedback.findAll({
+      include: [
+        { model: User, attributes: ['id', 'name', 'email'] },
+        { model: Order, attributes: ['id', 'totalAmount', 'status'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(feedbacks);
+  } catch (err) {
+    console.error('Admin Feedback Error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ----------------------------------------
+// Appointment Management (Admin)
+// ----------------------------------------
+router.get('/appointments', adminAuth, async (req, res) => {
+  try {
+    const appointments = await Appointment.findAll({
+      include: [{ model: User, attributes: ['id', 'name', 'email', 'phone'] }],
+      order: [['appointmentDate', 'ASC'], ['appointmentTime', 'ASC']]
+    });
+    res.json(appointments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.put('/appointments/:id/status', adminAuth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const appt = await Appointment.findByPk(req.params.id);
+    if (!appt) return res.status(404).json({ message: 'Appointment not found' });
+    appt.status = status;
+    await appt.save();
+    res.json(appt);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
+

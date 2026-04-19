@@ -1,20 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { Order, OrderItem, Medicine, sequelize } = require('../models');
+const { Order, OrderItem, Medicine, Feedback, sequelize } = require('../models');
 
 // Create a new order
 router.post('/', auth, async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    const { items, address, deliveryTimeSlot, totalAmount } = req.body;
+    const { items, address, deliveryTimeSlot, totalAmount, paymentMethod } = req.body;
     
     // 1. Create the order
     const order = await Order.create({
       userId: req.user.id,
       totalAmount,
       address,
-      deliveryTimeSlot
+      deliveryTimeSlot,
+      paymentMethod: paymentMethod || 'card'
     }, { transaction: t });
 
     // 2. Process items and decrement stock
@@ -52,15 +53,15 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Get user's orders
+// Get user's orders (includes Feedback so frontend knows if already rated)
 router.get('/', auth, async (req, res) => {
   try {
     const orders = await Order.findAll({
       where: { userId: req.user.id },
-      include: [{
-        model: OrderItem,
-        include: [Medicine]
-      }],
+      include: [
+        { model: OrderItem, include: [Medicine] },
+        { model: Feedback }
+      ],
       order: [['createdAt', 'DESC']]
     });
     res.json(orders);
@@ -137,6 +138,55 @@ router.put('/:id/return', auth, async (req, res) => {
   } catch (err) {
     console.error('Order Return Error:', err.message);
     res.status(400).json({ message: err.message || 'Server error during return request' });
+  }
+});
+
+// Submit feedback for a delivered order (once per order)
+router.post('/:id/feedback', auth, async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const orderId = parseInt(req.params.id);
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5.' });
+    }
+
+    const order = await Order.findOne({ where: { id: orderId, userId: req.user.id } });
+    if (!order) return res.status(404).json({ message: 'Order not found.' });
+    if (order.status !== 'Delivered') {
+      return res.status(400).json({ message: 'Feedback can only be submitted for delivered orders.' });
+    }
+
+    const existing = await Feedback.findOne({ where: { orderId, userId: req.user.id } });
+    if (existing) {
+      return res.status(400).json({ message: 'Feedback already submitted for this order.' });
+    }
+
+    const feedback = await Feedback.create({
+      orderId,
+      userId: req.user.id,
+      rating,
+      comment: comment || ''
+    });
+
+    res.status(201).json(feedback);
+  } catch (err) {
+    console.error('Feedback Submit Error:', err.message);
+    res.status(500).json({ message: 'Server error while submitting feedback.' });
+  }
+});
+
+// Get feedback for a specific order (by authenticated user)
+router.get('/:id/feedback', auth, async (req, res) => {
+  try {
+    const feedback = await Feedback.findOne({
+      where: { orderId: req.params.id, userId: req.user.id }
+    });
+    if (!feedback) return res.status(404).json({ message: 'No feedback found.' });
+    res.json(feedback);
+  } catch (err) {
+    console.error('Feedback Fetch Error:', err.message);
+    res.status(500).json({ message: 'Server error.' });
   }
 });
 

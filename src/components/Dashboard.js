@@ -7,6 +7,7 @@ import Payment from "./Payment";
 import Wishlist from "./Wishlist";
 import Adviser from "./Adviser";
 
+import Appointments from "./Appointments";
 import Settings from "./Settings";
 import Overview from "./Overview";
 import Footer from "./Footer";
@@ -162,6 +163,13 @@ function Dashboard() {
           </button>
 
           <button
+            className={activeTab === "appointments" ? "active" : ""}
+            onClick={() => setActiveTab("appointments")}
+          >
+            🏥 Book Appointment
+          </button>
+
+          <button
             className={activeTab === "settings" ? "active" : ""}
             onClick={() => setActiveTab("settings")}
           >
@@ -244,6 +252,7 @@ function Dashboard() {
           />
         )}
         {activeTab === "wishlist" && <Wishlist />}
+        {activeTab === "appointments" && <Appointments />}
         {activeTab === "settings" && <Settings userProfile={userProfile} setUserProfile={setUserProfile} />}
         
         <Footer />

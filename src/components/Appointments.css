@@ -1,0 +1,1056 @@
+/* ============================================================
+   APPOINTMENTS — Redesigned UI
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.appt-wrap {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: #f1f5f9;
+  min-height: 100%;
+  padding-bottom: 60px;
+}
+
+/* ── Step Bar ────────────────────────────────────────────────── */
+.appt-step-bar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 18px 32px;
+  border-bottom: 1px solid #e2e8f0;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.appt-step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.asb-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.appt-step-item.active .asb-circle {
+  border-color: #1abc9c;
+  background: #1abc9c;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(26,188,156,0.2);
+}
+.appt-step-item.done .asb-circle {
+  border-color: #1abc9c;
+  background: #1abc9c;
+  color: #fff;
+}
+.asb-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+.appt-step-item.active .asb-label { color: #1abc9c; }
+.appt-step-item.done  .asb-label  { color: #1abc9c; }
+.asb-line {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 6px;
+}
+.asb-line.done { background: #1abc9c; }
+
+/* ── Body ───────────────────────────────────────────────────── */
+.appt-body {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  animation: apptSlide 0.28s ease;
+}
+@keyframes apptSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Typography ─────────────────────────────────────────────── */
+.appt-section-title { margin-bottom: 22px; }
+.appt-section-title.inline { margin-bottom: 0; }
+.appt-section-title h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+.appt-section-title p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ── Back row ───────────────────────────────────────────────── */
+.appt-back-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.appt-back-btn {
+  padding: 8px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s;
+  flex-shrink: 0;
+}
+.appt-back-btn:hover { background: #f8fafc; border-color: #94a3b8; }
+
+/* ── Service Category Grid ──────────────────────────────────── */
+.service-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 36px;
+}
+@media (max-width: 620px) { .service-cat-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 440px) { .service-cat-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.service-cat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 10px 14px;
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  line-height: 1.35;
+}
+.service-cat-card:hover {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(26,188,156,0.15);
+}
+.scc-icon { font-size: 28px; }
+.scc-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  white-space: pre-line;
+  text-align: center;
+}
+
+/* ── How It Works ───────────────────────────────────────────── */
+.how-it-works {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 30px;
+  border: 1px solid #e2e8f0;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.hiw-step { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.hiw-icon { font-size: 24px; }
+.hiw-label { font-size: 11px; font-weight: 700; color: #64748b; white-space: nowrap; }
+.hiw-arrow { font-size: 16px; color: #1abc9c; margin: 0 6px; font-weight: 700; }
+
+/* ── My Appointments (Step 0) ───────────────────────────────── */
+.my-appts-section { margin-top: 4px; }
+.my-appts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.my-appts-header h3 { font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; }
+.view-all-btn {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1abc9c;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.appt-warn-bar {
+  font-size: 12px;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+}
+.no-appts-msg, .appt-loading-msg {
+  text-align: center;
+  padding: 28px;
+  color: #94a3b8;
+  font-size: 13px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px dashed #e2e8f0;
+}
+.my-appt-mini-list { display: flex; flex-direction: column; gap: 10px; }
+.my-appt-mini-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  transition: box-shadow 0.2s;
+}
+.my-appt-mini-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.mamc-left { flex: 1; }
+.mamc-service { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+.mamc-hospital { font-size: 12px; color: #475569; margin-bottom: 3px; }
+.mamc-datetime { font-size: 11px; color: #94a3b8; }
+.mamc-notes { font-size: 11px; color: #1abc9c; margin-top: 3px; font-weight: 600; }
+.mamc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.mamc-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.mamc-cancel {
+  background: none;
+  border: 1.5px solid #fca5a5;
+  color: #dc2626;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.mamc-cancel:hover { background: #fef2f2; }
+
+/* ── Package Cards (Step 1) ────────────────────────────────── */
+.pkg-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+.pkg-card {
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.pkg-card:hover { border-color: #1abc9c; box-shadow: 0 4px 16px rgba(26,188,156,0.12); }
+.pkg-card.selected {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  box-shadow: 0 4px 20px rgba(26,188,156,0.18);
+}
+.pkg-left { display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0; }
+.pkg-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.pkg-info { flex: 1; min-width: 0; }
+.pkg-name { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+.pkg-tests { font-size: 12px; color: #64748b; margin-bottom: 4px; font-weight: 600; }
+.pkg-desc { font-size: 12px; color: #94a3b8; line-height: 1.45; margin-bottom: 6px; }
+.pkg-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: #1abc9c;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+.pkg-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.pkg-price-wrap { display: flex; align-items: center; gap: 6px; }
+.pkg-orig {
+  font-size: 12px;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+.pkg-discount {
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.pkg-price { font-size: 20px; font-weight: 800; color: #0f172a; }
+.pkg-add-btn {
+  padding: 8px 18px;
+  background: #1abc9c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s;
+  white-space: nowrap;
+}
+.pkg-add-btn:hover { background: #16a085; }
+.pkg-add-btn.added { background: #0d9488; }
+
+/* Cart bar */
+.cart-bar {
+  position: sticky;
+  bottom: 0;
+  background: #1abc9c;
+  border-radius: 14px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 -4px 20px rgba(26,188,156,0.3);
+  animation: apptSlide 0.2s ease;
+}
+.cart-bar-info { display: flex; flex-direction: column; gap: 2px; }
+.cb-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); }
+.cb-price { font-size: 20px; font-weight: 800; color: #fff; }
+.cart-bar-btn {
+  padding: 11px 24px;
+  background: #fff;
+  color: #0d9488;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s;
+}
+.cart-bar-btn:hover { background: #f0fdf9; }
+.appt-nav-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+.appt-skip-btn {
+  padding: 10px 20px;
+  background: none;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.appt-skip-btn:hover { background: #f8fafc; border-color: #94a3b8; }
+
+/* ── Location Step (Step 2) ────────────────────────────────── */
+.location-search-wrap {
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 4px 16px;
+  margin-bottom: 24px;
+  transition: border-color 0.2s;
+}
+.location-search-wrap:focus-within { border-color: #1abc9c; box-shadow: 0 0 0 3px rgba(26,188,156,0.12); }
+.loc-input-row { display: flex; align-items: center; gap: 10px; }
+.loc-search-icon { font-size: 18px; }
+.loc-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #1e293b;
+  padding: 14px 0;
+  background: transparent;
+  font-family: inherit;
+}
+.loc-input::placeholder { color: #94a3b8; }
+.loc-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.city-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.city-chip {
+  padding: 7px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  background: #fff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.city-chip:hover { border-color: #1abc9c; background: #f0fdf9; color: #0d9488; }
+.recent-city-list { display: flex; flex-direction: column; gap: 0; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+.recent-city-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  text-align: left;
+  transition: background 0.15s;
+}
+.recent-city-item:last-child { border-bottom: none; }
+.recent-city-item:hover { background: #f8fafc; }
+.rci-icon { font-size: 16px; }
+
+/* ── Hospitals List (Step 3) ───────────────────────────────── */
+.hosp-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.hosp-item {
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.hosp-item:hover { border-color: #1abc9c; background: #f0fdf9; }
+.hosp-item.selected { border-color: #1abc9c; background: #f0fdf9; box-shadow: 0 4px 14px rgba(26,188,156,0.15); }
+.hosp-initials {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.hosp-item-info { flex: 1; min-width: 0; }
+.hi-name { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+.hi-city { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+.hi-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hi-dist { font-size: 11px; color: #64748b; }
+.hi-rating { font-size: 11px; font-weight: 700; color: #f59e0b; }
+.hi-type {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #f0fdf9;
+  color: #0d9488;
+}
+.hi-type.govt { background: #fffbeb; color: #b45309; }
+.hosp-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  flex-shrink: 0;
+  transition: all 0.18s;
+  position: relative;
+}
+.hosp-radio.checked {
+  border-color: #1abc9c;
+  background: #1abc9c;
+  box-shadow: inset 0 0 0 4px #fff;
+}
+
+/* ── Date Strip ────────────────────────────────────────────── */
+.date-strip-section { margin-bottom: 24px; }
+.ds-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.slots-avail {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1abc9c;
+  background: #f0fdf9;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+.date-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+.date-strip::-webkit-scrollbar { display: none; }
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.18s;
+  min-width: 64px;
+}
+.date-cell:hover { border-color: #1abc9c; background: #f0fdf9; }
+.date-cell.selected { border-color: #1abc9c; background: #1abc9c; }
+.dc-day { font-size: 11px; font-weight: 700; color: #94a3b8; }
+.dc-date { font-size: 20px; font-weight: 800; color: #0f172a; }
+.dc-month { font-size: 10px; font-weight: 600; color: #94a3b8; }
+.date-cell.selected .dc-day,
+.date-cell.selected .dc-date,
+.date-cell.selected .dc-month { color: #fff; }
+
+/* ── Time Slots ─────────────────────────────────────────────── */
+.time-slot-section { margin-bottom: 24px; }
+.time-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+.ts-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ts-card:hover { border-color: #1abc9c; background: #f0fdf9; }
+.ts-card.selected { border-color: #1abc9c; background: #1abc9c; }
+.tsc-time { font-size: 13px; font-weight: 700; color: #334155; }
+.tsc-slots { font-size: 11px; color: #94a3b8; font-weight: 600; }
+.ts-card.selected .tsc-time { color: #fff; }
+.ts-card.selected .tsc-slots { color: rgba(255,255,255,0.8); }
+
+/* ── Booking Footer ─────────────────────────────────────────── */
+.booking-footer {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px 22px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  margin-top: 8px;
+}
+.bf-summary { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.bf-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  gap: 8px;
+}
+.bf-row.muted { color: #64748b; font-weight: 500; font-size: 12px; }
+.bf-pkg {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0d9488;
+  background: #f0fdf9;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* ── Primary Button ─────────────────────────────────────────── */
+.appt-primary-btn {
+  width: 100%;
+  padding: 14px 28px;
+  background: #1abc9c;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  letter-spacing: 0.2px;
+}
+.appt-primary-btn:hover { background: #16a085; transform: translateY(-1px); }
+.appt-primary-btn:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+
+/* ── Success Screen ─────────────────────────────────────────── */
+.appt-success-screen {
+  max-width: 520px;
+  margin: 60px auto;
+  text-align: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 48px 36px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  animation: apptSlide 0.3s ease;
+}
+.success-tick { font-size: 56px; margin-bottom: 16px; }
+.appt-success-screen h2 { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 8px; }
+.appt-success-screen > p { font-size: 14px; color: #64748b; margin: 0 0 28px; }
+.success-summary-card {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ss-row { display: flex; justify-content: space-between; align-items: center; }
+.ss-label { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+.ss-value { font-size: 14px; font-weight: 600; color: #1e293b; }
+.ss-total .ss-label { color: #0f172a; font-size: 13px; }
+.ss-total .ss-value.teal { color: #1abc9c; font-size: 18px; font-weight: 800; }
+.ss-total { margin-top: 6px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+
+/* ── Mandatory plan notice ──────────────────────────────────── */
+.pkg-must-select {
+  text-align: center;
+  padding: 14px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+/* ── Payment Step (Step 4) ──────────────────────────────────── */
+.pay-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 660px) { .pay-layout { grid-template-columns: 1fr; } }
+
+.pay-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+.pay-card-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Summary rows */
+.pay-summary-rows { display: flex; flex-direction: column; gap: 12px; }
+.psr {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.psr-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.psr-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Price rows */
+.pay-price-rows { display: flex; flex-direction: column; gap: 10px; }
+.ppr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #475569;
+}
+.ppr.green { color: #16a34a; }
+.ppr.total {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 4px;
+}
+
+/* Payment method list */
+.pay-methods { display: flex; flex-direction: column; gap: 0; }
+.pay-method-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 0;
+}
+.pay-method-row:last-child { border-bottom: none; }
+.pay-method-row.selected .pm-label { color: #1abc9c; font-weight: 700; }
+.pm-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  flex-shrink: 0;
+  transition: all 0.18s;
+}
+.pm-radio.checked {
+  border-color: #1abc9c;
+  background: #1abc9c;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+.pm-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  transition: color 0.18s;
+}
+.pm-icons { display: flex; gap: 4px; align-items: center; }
+.pm-icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  min-width: 26px;
+  height: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0 4px;
+  background: #f8fafc;
+  font-weight: 800;
+  color: #334155;
+}
+
+.pay-secure-note {
+  text-align: center;
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 10px 0 0;
+  font-weight: 500;
+}
+
+/* ── Appointment Payment Form (Step 4) ──────────────────────── */
+.appt-pay-form {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+  animation: apptSlide 0.22s ease;
+}
+
+.appt-pay-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.appt-pay-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.appt-pay-input {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  box-sizing: border-box;
+  outline: none;
+}
+.appt-pay-input:focus {
+  border-color: #1abc9c;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(26,188,156,0.12);
+}
+.appt-pay-input::placeholder { color: #94a3b8; }
+
+.appt-pay-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+.appt-pay-row {
+  display: flex;
+  gap: 12px;
+}
+.appt-pay-row .appt-pay-field { flex: 1; }
+
+.appt-pay-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* UPI app chips */
+.appt-pay-upi-apps {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+.appt-upi-app-chip {
+  padding: 6px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  background: #f8fafc;
+  cursor: default;
+  transition: border-color 0.15s, background 0.15s;
+}
+.appt-upi-app-chip:hover {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  color: #0d9488;
+}
+
+/* Wallet grid — removed */
+
+/* Net Banking bank tile grid */
+.appt-nb-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+@media (max-width: 500px) { .appt-nb-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.appt-nb-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px 8px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+}
+.appt-nb-tile:hover {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26,188,156,0.12);
+}
+.appt-nb-tile.selected {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  box-shadow: 0 4px 14px rgba(26,188,156,0.18);
+}
+.appt-nb-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+.appt-nb-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  line-height: 1.2;
+}
+.appt-nb-tile.selected .appt-nb-name { color: #0d9488; }
+.appt-nb-check {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #1abc9c;
+}
+
+/* Account type pill buttons */
+.appt-nb-actype-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.appt-nb-actype-btn {
+  padding: 7px 18px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.appt-nb-actype-btn:hover {
+  border-color: #1abc9c;
+  background: #f0fdf9;
+  color: #0d9488;
+}
+.appt-nb-actype-btn.selected {
+  border-color: #1abc9c;
+  background: #1abc9c;
+  color: #fff;
+}
+
+/* Net Banking security note */
+.appt-nb-secure-note {
+  font-size: 11px;
+  color: #64748b;
+  background: #f0fdf9;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+
+
+/* Card visual preview */
+.appt-card-visual {
+  background: linear-gradient(135deg, #1abc9c 0%, #0d9488 60%, #0e7490 100%);
+  border-radius: 14px;
+  padding: 18px 20px 16px;
+  color: #fff;
+  margin-bottom: 4px;
+  box-shadow: 0 8px 24px rgba(26,188,156,0.28);
+  position: relative;
+  overflow: hidden;
+}
+.appt-card-visual::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+}
+.appt-card-visual::after {
+  content: '';
+  position: absolute;
+  bottom: -20px; left: -20px;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+.acv-chip {
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 14px;
+  font-weight: 900;
+}
+.acv-number {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  gap: 1px;
+  flex-wrap: wrap;
+}
+.acv-dot {
+  color: rgba(255,255,255,0.45);
+}
+.acv-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.acv-mini-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 2px;
+}
+.acv-mini-val {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #fff;
+}

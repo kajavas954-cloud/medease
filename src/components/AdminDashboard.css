@@ -248,23 +248,27 @@
 
 .status-dropdown {
   padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.08);
-  color: #e2e8f0;
+  border-radius: 8px;
+  border: 2px solid #cbd5e1;
+  background: #fff;
+  color: #1e293b;
   font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: auto;
 }
 
 .status-dropdown:focus {
   border-color: #1abc9c;
+  box-shadow: 0 0 0 3px rgba(26,188,156,0.2);
 }
 
 .status-dropdown option {
-  background: #1e2a38;
-  color: #e2e8f0;
+  background: #fff;
+  color: #1e293b;
+  font-weight: 500;
 }
 
 /* ── Ticket message cell ── */

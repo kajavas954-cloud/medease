@@ -14,6 +14,29 @@ const categoryImages = {
   Homeopathy: "https://images.unsplash.com/photo-1612061483321-715bd0ee7949?q=80&w=1974&auto=format&fit=crop"
 };
 
+// Renders an image with a shimmer skeleton until it loads
+const ProductImage = ({ src, alt, className, onClick, title, style }) => {
+  const [loaded, setLoaded] = React.useState(false);
+  const [errored, setErrored] = React.useState(false);
+  return (
+    <>
+      <div className={`img-shimmer${loaded || errored ? ' hidden' : ''}`} aria-hidden="true" />
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        onClick={onClick}
+        title={title}
+        style={style}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => { setLoaded(true); setErrored(true); }}
+      />
+    </>
+  );
+};
+
 function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -247,13 +270,18 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
               >
                 {wishlist.some(w => w.name === item.name) ? "❤️" : "🤍"}
               </button>
-              <img
-                src={item.imageUrl || categoryImages[item.category] || categoryImages.Medicine}
-                alt={item.name}
-                className="product-image modal-trigger"
-                onClick={() => setSelectedItem(item)}
-                title="Click for details"
-              />
+              <div className={`product-image-wrapper${item.stockQuantity <= 0 ? ' oos-wrapper' : ''}`}>
+                <ProductImage
+                  src={item.imageUrl || categoryImages[item.category] || categoryImages.Medicine}
+                  alt={item.name}
+                  className={`product-image modal-trigger${item.stockQuantity <= 0 ? ' oos-image' : ''}`}
+                  onClick={() => setSelectedItem(item)}
+                  title="Click for details"
+                />
+                {item.stockQuantity <= 0 && (
+                  <div className="oos-ribbon">Out of Stock</div>
+                )}
+              </div>
               <h4>{item.name}</h4>
               <div className="rating">
                 <span className="stars">{"★".repeat(Math.floor(item.rating))}</span>
@@ -303,10 +331,17 @@ function Medicines({ searchQuery, onSearchChange, setActiveTab }) {
             <button className="close-modal" onClick={() => setSelectedItem(null)}>✖</button>
             <div className="modal-content-wrap">
               <div className="modal-image-col">
-                <img 
-                  src={selectedItem.imageUrl || categoryImages[selectedItem.category] || categoryImages.Medicine} 
-                  alt={selectedItem.name} 
-                />
+                <div className={`product-image-wrapper${selectedItem.stockQuantity <= 0 ? ' oos-wrapper' : ''}`} style={{ width: '100%' }}>
+                  <ProductImage
+                    src={selectedItem.imageUrl || categoryImages[selectedItem.category] || categoryImages.Medicine}
+                    alt={selectedItem.name}
+                    className={selectedItem.stockQuantity <= 0 ? 'oos-image' : ''}
+                    style={{ width: '100%', maxWidth: '300px', objectFit: 'contain', borderRadius: '12px' }}
+                  />
+                  {selectedItem.stockQuantity <= 0 && (
+                    <div className="oos-ribbon">Out of Stock</div>
+                  )}
+                </div>
               </div>
               <div className="modal-info-col">
                 <h2>{selectedItem.name}</h2>

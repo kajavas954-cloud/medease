@@ -432,6 +432,47 @@
   box-shadow: none !important;
 }
 
+/* =========================
+   OUT-OF-STOCK IMAGE OVERLAY
+   ========================= */
+.product-image-wrapper {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Remove the default margin from the img when inside the wrapper */
+.product-image-wrapper .product-image {
+  margin-bottom: 0;
+}
+
+.oos-image {
+  filter: grayscale(80%) brightness(0.75);
+  opacity: 0.7;
+}
+
+.oos-ribbon {
+  position: absolute;
+  top: 18px;
+  left: -28px;
+  width: 130px;
+  padding: 6px 0;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  z-index: 3;
+  pointer-events: none;
+}
+
 .medicine-card button {
   margin-top: auto;             /* 🔑 PUSH DOWN */
   padding: 10px;
@@ -681,4 +722,32 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* =========================
+   IMAGE SHIMMER SKELETON
+   ========================= */
+.img-shimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    #e8edf2 0%,
+    #f5f7fa 40%,
+    #e8edf2 80%
+  );
+  background-size: 200% 100%;
+  animation: imgShimmer 1.4s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
 
+.img-shimmer.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes imgShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

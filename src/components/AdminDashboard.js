@@ -23,6 +23,8 @@ const AdminDashboard = () => {
   const [confirmDialog, setConfirmDialog] = useState(null);
   const toast = useToast();
   const confirmResolveRef = useRef(null);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [orderTab, setOrderTab] = useState('active'); // Orders tab switcher
 
   // Product modal
   const [showProductModal, setShowProductModal] = useState(false);
@@ -62,6 +64,12 @@ const AdminDashboard = () => {
         if (res.ok) setData(await res.json());
       } else if (activeTab === 'Support Tickets') {
         const res = await fetch('http://localhost:5000/api/admin/tickets', { headers });
+        if (res.ok) setData(await res.json());
+      } else if (activeTab === 'Feedback Reviews') {
+        const res = await fetch('http://localhost:5000/api/admin/feedback', { headers });
+        if (res.ok) setData(await res.json());
+      } else if (activeTab === 'Appointments') {
+        const res = await fetch('http://localhost:5000/api/admin/appointments', { headers });
         if (res.ok) setData(await res.json());
       }
     } catch (err) {
@@ -228,80 +236,204 @@ const AdminDashboard = () => {
 
   const renderOrders = () => {
     const activeOrders = data.filter(o => !['Cancelled', 'Return Requested'].includes(o.status));
-    const finalOrders = data.filter(o => ['Cancelled', 'Return Requested'].includes(o.status));
+    const finalOrders  = data.filter(o =>  ['Cancelled', 'Return Requested'].includes(o.status));
 
-    const renderOrderTable = (orders, title) => (
-      <div className="admin-table-container" style={{ marginBottom: '30px' }}>
-        <div className="admin-action-bar">
-          <h2 className="mb-0">{title}</h2>
+    const paymentIcon = (m) => {
+      const v = (m || 'card').toLowerCase();
+      if (v === 'upi')        return '📱 UPI';
+      if (v === 'netbanking') return '🏦 Net Banking';
+      return '💳 Card';
+    };
+    const paymentColor = (m) => {
+      const v = (m || 'card').toLowerCase();
+      if (v === 'upi')        return { bg: '#ede9fe', color: '#7c3aed' };
+      if (v === 'netbanking') return { bg: '#dbeafe', color: '#1d4ed8' };
+      return { bg: '#dcfce7', color: '#15803d' };
+    };
+    const parseAddress = (raw) => {
+      try { const a = JSON.parse(raw); if (a && a.street) return a; } catch (e) {}
+      return null;
+    };
+
+    const renderOrderCard = (o) => {
+      const isFinal = ['Cancelled', 'Return Requested'].includes(o.status);
+      const pc   = paymentColor(o.paymentMethod);
+      const addr = parseAddress(o.address);
+      return (
+        <div key={o.id} style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+
+          {/* Header */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '14px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '15px', fontWeight: 800, color: '#1e293b' }}>Order #{o.id}</span>
+              <span style={{ fontSize: '12px', color: '#94a3b8' }}>📅 {new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+              <span style={{ fontSize: '13px', color: '#475569', fontWeight: 600 }}>
+                👤 {o.User?.name || 'Guest'}
+                {o.User?.email && <span style={{ fontWeight: 400, color: '#94a3b8' }}> · {o.User.email}</span>}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>₹{parseFloat(o.totalAmount).toFixed(2)}</span>
+            </div>
+          </div>
+
+          {/* Info strips */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ padding: '14px 20px', borderRight: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>📍 Delivery Address</div>
+              {addr ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {[['Street', addr.street], ['City', addr.city], ['State', addr.state], ['Pin', addr.postalCode]].filter(([, v]) => v).map(([label, value]) => (
+                    <div key={label} style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, minWidth: '44px', flexShrink: 0 }}>{label}:</span>
+                      <span style={{ fontSize: '13px', color: '#1e293b', fontWeight: 500 }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '13px', color: '#1e293b' }}>{o.address || '—'}</div>
+              )}
+            </div>
+            <div style={{ padding: '14px 20px', borderRight: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>🕐 Delivery Slot</div>
+              <div style={{ fontSize: '13px', color: '#1e293b', fontWeight: 600, marginBottom: '14px' }}>{o.deliveryTimeSlot || '—'}</div>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '6px' }}>💰 Payment Method</div>
+              <span style={{ display: 'inline-block', padding: '3px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, background: pc.bg, color: pc.color }}>{paymentIcon(o.paymentMethod)}</span>
+            </div>
+            <div style={{ padding: '14px 20px', borderRight: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>📦 Delivery Status</div>
+              <span className="order-status-badge" style={{
+                background: orderStatusColor(o.status),
+                display: 'inline-block', padding: '5px 14px', borderRadius: '20px',
+                fontSize: '13px', fontWeight: 700, color: '#fff', marginBottom: '10px'
+              }}>
+                {o.status || 'Pending'}
+              </span>
+              {!isFinal && (
+                <div style={{ marginTop: '8px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '6px' }}>Update Status</div>
+                  <select
+                    className="status-dropdown"
+                    value={o.status || 'Pending'}
+                    onChange={(e) => handleOrderStatusChange(o.id, e.target.value)}
+                    style={{ fontSize: '12px', padding: '4px 8px' }}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Return Requested">Return Requested</option>
+                  </select>
+                </div>
+              )}
+            </div>
+            {(o.cancelReason || o.returnReason) && (
+              <div style={{ padding: '14px 20px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>⚠️ Reason</div>
+                <div style={{ fontSize: '13px', color: '#475569', fontStyle: 'italic', lineHeight: 1.5 }}>{o.cancelReason || o.returnReason}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Items Table */}
+          {o.OrderItems && o.OrderItems.length > 0 && (
+            <div>
+              <div style={{ padding: '10px 20px 4px', fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                🛍️ Items Ordered ({o.OrderItems.length})
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+                    {['#', 'Product Name', 'Qty', 'Unit Price', 'Subtotal'].map(h => (
+                      <th key={h} style={{ padding: '7px 16px', textAlign: 'left', fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {o.OrderItems.map((item, idx) => (
+                    <tr key={item.id} style={{ borderTop: '1px solid #f1f5f9', background: idx % 2 === 0 ? '#fff' : '#fafbfc' }}>
+                      <td style={{ padding: '9px 16px', fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>{idx + 1}</td>
+                      <td style={{ padding: '9px 16px', fontSize: '13px', color: '#1e293b', fontWeight: 600 }}>{item.Medicine?.name || 'Item #' + item.medicineId}</td>
+                      <td style={{ padding: '9px 16px' }}>
+                        <span style={{ background: '#eff6ff', color: '#1d4ed8', padding: '2px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}>x{item.quantity}</span>
+                      </td>
+                      <td style={{ padding: '9px 16px', fontSize: '13px', color: '#475569' }}>₹{parseFloat(item.priceAtTime).toFixed(2)}</td>
+                      <td style={{ padding: '9px 16px', fontSize: '13px', color: '#15803d', fontWeight: 700 }}>₹{(item.quantity * parseFloat(item.priceAtTime)).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr style={{ borderTop: '2px solid #e2e8f0', background: '#f8fafc' }}>
+                    <td colSpan="4" style={{ padding: '9px 16px', fontSize: '12px', fontWeight: 700, color: '#64748b', textAlign: 'right' }}>Order Total</td>
+                    <td style={{ padding: '9px 16px', fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>₹{parseFloat(o.totalAmount).toFixed(2)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          )}
         </div>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Total Amount</th>
-              <th>Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map(o => {
-              const isFinal = o.status === 'Cancelled' || o.status === 'Return Requested';
-              return (
-                <tr key={o.id}>
-                  <td>#{o.id}</td>
-                  <td>{o.User?.name || 'Guest'}</td>
-                  <td>₹{parseFloat(o.totalAmount).toFixed(2)}</td>
-                  <td>{new Date(o.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    {isFinal ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span className="order-status-badge" style={{ background: orderStatusColor(o.status) }}>
-                          {o.status}
-                        </span>
-                        {o.cancelReason && (
-                          <div style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', maxWidth: '150px' }}>
-                            Cancel Reason: {o.cancelReason}
-                          </div>
-                        )}
-                        {o.returnReason && (
-                          <div style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', maxWidth: '150px' }}>
-                            Return Reason: {o.returnReason}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <select
-                        className="status-dropdown"
-                        value={o.status || 'Pending'}
-                        onChange={(e) => handleOrderStatusChange(o.id, e.target.value)}
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Processing">Processing</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
-                        <option value="Return Requested">Return Requested</option>
-                      </select>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-            {orders.length === 0 && !loading && <tr><td colSpan="5" className="text-center">No orders found.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-    );
+      );
+    };
+
+    const shownOrders = orderTab === 'active' ? activeOrders : finalOrders;
 
     return (
       <div>
-        {renderOrderTable(activeOrders, 'Active Orders')}
-        {renderOrderTable(finalOrders, 'Returns & Cancellations')}
+        {/* ── Tab Switcher ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '10px',
+          marginBottom: '24px', background: '#f1f5f9',
+          padding: '5px', borderRadius: '14px', width: 'fit-content'
+        }}>
+          {[
+            { key: 'active',    label: '📦 Active Orders',        count: activeOrders.length,  activeColor: '#1abc9c' },
+            { key: 'cancelled', label: '❌ Cancelled & Returns', count: finalOrders.length,   activeColor: '#ef4444' },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setOrderTab(tab.key)}
+              style={{
+                padding: '9px 20px',
+                borderRadius: '10px',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: 700,
+                fontSize: '13px',
+                fontFamily: 'inherit',
+                transition: 'all 0.18s',
+                background: orderTab === tab.key ? '#fff' : 'transparent',
+                color:      orderTab === tab.key ? tab.activeColor : '#64748b',
+                boxShadow:  orderTab === tab.key ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
+                display: 'flex', alignItems: 'center', gap: '8px',
+              }}
+            >
+              {tab.label}
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                minWidth: '22px', height: '22px', borderRadius: '20px', padding: '0 6px',
+                fontSize: '11px', fontWeight: 800,
+                background: orderTab === tab.key ? tab.activeColor : '#e2e8f0',
+                color:      orderTab === tab.key ? '#fff' : '#64748b',
+              }}>{tab.count}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Orders List ── */}
+        {shownOrders.length === 0 && !loading ? (
+          <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '14px', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #e2e8f0' }}>
+            {orderTab === 'active' ? 'No active orders.' : 'No cancelled or returned orders.'}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {shownOrders.map(o => renderOrderCard(o))}
+          </div>
+        )}
       </div>
     );
   };
+
 
   const renderUsers = () => (
     <div className="admin-table-container">
@@ -379,12 +511,166 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const renderFeedback = () => (
+    <div className="admin-table-container">
+      <div className="admin-action-bar">
+        <h2 className="mb-0">⭐ Customer Feedback Reviews</h2>
+      </div>
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Order #</th>
+            <th>Rating</th>
+            <th>Comment</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map(fb => (
+            <tr key={fb.id}>
+              <td style={{ fontWeight: 600 }}>{fb.User?.name || 'Unknown'}</td>
+              <td style={{ color: '#64748b', fontSize: '13px' }}>{fb.User?.email || '—'}</td>
+              <td>
+                <span style={{
+                  background: '#e0f2fe', color: '#0277bd',
+                  padding: '3px 10px', borderRadius: '20px',
+                  fontSize: '12px', fontWeight: 700
+                }}>#{fb.Order?.id || fb.orderId}</span>
+              </td>
+              <td>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ color: '#f59e0b', fontSize: '16px', letterSpacing: '1px' }}>
+                    {'★'.repeat(fb.rating)}{'☆'.repeat(5 - fb.rating)}
+                  </span>
+                  <span style={{
+                    background: fb.rating >= 4 ? '#dcfce7' : fb.rating === 3 ? '#fef9c3' : '#fee2e2',
+                    color: fb.rating >= 4 ? '#15803d' : fb.rating === 3 ? '#92400e' : '#b91c1c',
+                    padding: '2px 8px', borderRadius: '10px',
+                    fontSize: '11px', fontWeight: 700
+                  }}>{fb.rating}/5</span>
+                </div>
+              </td>
+              <td style={{ maxWidth: '240px' }}>
+                <span style={{
+                  display: 'block', fontSize: '13px',
+                  fontStyle: fb.comment ? 'normal' : 'italic',
+                  color: fb.comment ? '#e2e8f0' : '#64748b'
+                }}>
+                  {fb.comment || 'No comment provided.'}
+                </span>
+              </td>
+              <td style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap' }}>
+                {new Date(fb.createdAt).toLocaleDateString('en-IN', {
+                  day: '2-digit', month: 'short', year: 'numeric'
+                })}
+              </td>
+            </tr>
+          ))}
+          {data.length === 0 && !loading && (
+            <tr>
+              <td colSpan="6" className="text-center" style={{ color: '#94a3b8', fontSize: '14px', padding: '30px' }}>
+                No feedback reviews yet.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const apptStatusColor = (s) => {
+    if (s === 'Confirmed') return '#0d9488';
+    if (s === 'Cancelled') return '#dc2626';
+    return '#b45309';
+  };
+
+  const renderAppointments = () => {
+    const handleApptStatus = async (id, status) => {
+      const token = localStorage.getItem('adminToken');
+      try {
+        const res = await fetch(`http://localhost:5000/api/admin/appointments/${id}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+          setData(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+          toast(`Appointment ${status}`);
+        }
+      } catch (e) { toast('Update failed', 'error'); }
+    };
+
+    return (
+      <div>
+        <div className="admin-action-bar" style={{ marginBottom: '20px' }}>
+          <h2 className="mb-0">
+            All Appointments{' '}
+            <span style={{ fontSize: '14px', fontWeight: 500, color: '#94a3b8' }}>({data.length})</span>
+          </h2>
+        </div>
+        {data.length === 0 && !loading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontSize: '14px', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+            No appointments booked yet.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {data.map(a => (
+              <div key={a.id} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: '14px', padding: '18px 22px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(155px,1fr))', gap: '16px', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Patient</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#f1f5f9' }}>{a.User?.name || 'Guest'}</div>
+                  <div style={{ fontSize: '12px', color: '#64748b' }}>{a.User?.email}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Service</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#e2e8f0' }}>{a.service}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Hospital</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0' }}>{a.hospitalName}</div>
+                  <div style={{ fontSize: '11px', color: '#64748b' }}>📍 {a.hospitalCity}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Date &amp; Time</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0' }}>
+                    {new Date(a.appointmentDate + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>🕐 {a.appointmentTime}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Status</div>
+                  <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, background: a.status === 'Confirmed' ? 'rgba(13,148,136,0.15)' : a.status === 'Cancelled' ? 'rgba(220,38,38,0.15)' : 'rgba(180,83,9,0.15)', color: apptStatusColor(a.status), marginBottom: '8px' }}>
+                    {a.status}
+                  </span>
+                  {a.status !== 'Cancelled' && (
+                    <select
+                      className="status-dropdown"
+                      value={a.status}
+                      onChange={e => handleApptStatus(a.id, e.target.value)}
+                      style={{ fontSize: '12px', display: 'block', marginTop: '4px' }}
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Confirmed">Confirmed</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="admin-dashboard-container">
       <aside className="admin-sidebar">
         <div className="admin-sidebar-header">MedEase Admin</div>
         <ul className="admin-nav-list">
-          {['Overview', 'Products', 'Orders', 'Users', 'Support Tickets'].map(tab => (
+          {['Overview', 'Products', 'Orders', 'Users', 'Support Tickets', 'Feedback Reviews', 'Appointments'].map(tab => (
             <li
               key={tab}
               className={`admin-nav-item ${activeTab === tab ? 'active' : ''}`}
@@ -409,6 +695,8 @@ const AdminDashboard = () => {
           {activeTab === 'Orders' && renderOrders()}
           {activeTab === 'Users' && renderUsers()}
           {activeTab === 'Support Tickets' && renderSupportTickets()}
+          {activeTab === 'Feedback Reviews' && renderFeedback()}
+          {activeTab === 'Appointments' && renderAppointments()}
         </div>
       </main>
 
